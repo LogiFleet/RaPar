@@ -1,0 +1,133 @@
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class AvlDataPacket {
+
+    private String raw;
+
+    private String imei;
+    private String preamble;
+    private String avlDataLength;
+    private String codecID;
+    private String avlDataCountBegin;
+
+    private String avlDataAggregatedPlusBalance;    // = avlDataAggregated + (avlDataCountEnd + crc) at the end
+
+    private List<AvlData> avlDataList;
+
+    private String avlDataCountEnd;
+    private String crc;
+
+    public AvlDataPacket(String raw, String imei, String preamble, String avlDataLength, String codecID, String avlDataCount, String avlDataAggregated) {
+        this.raw = raw;
+        this.imei = imei;
+        this.preamble = preamble;
+        this.avlDataLength = avlDataLength;
+        this.codecID = codecID;
+        this.avlDataCountBegin = avlDataCount;
+        this.avlDataAggregatedPlusBalance = avlDataAggregated;
+
+        this.avlDataList = new ArrayList<>();
+        splitAvlDataAggregated();
+    }
+
+    @Override
+    public String toString() {
+        return "packet{" +
+                "imei='" + imei + '\'' +
+                ", length='" + avlDataLength + '\'' +
+                ", codec='" + codecID + '\'' +
+                ", cnt begin='" + avlDataCountBegin + '\'' +
+                ", list=" + avlDataList +
+                ", cnt end='" + avlDataCountEnd + '\'' +
+                ", crc='" + crc + '\'' +
+                ", raw='" + raw + '\'' +
+                '}';
+    }
+
+//    @Override
+//    public String toString() {
+//        return "AvlDataPacket{" +
+//                "imei='" + imei + '\'' +
+//                ", preamble='" + preamble + '\'' +
+//                ", avlDataLength='" + avlDataLength + '\'' +
+//                ", codecID='" + codecID + '\'' +
+//                ", avlDataCountBegin='" + avlDataCountBegin + '\'' +
+////                ", avlDataAggregatedPlusBalance='" + avlDataAggregatedPlusBalance + '\'' +
+//                ", avlDataList=" + avlDataList +y§
+//                ", avlDataCountEnd='" + avlDataCountEnd + '\'' +
+//                ", crc='" + crc + '\'' +
+//                ", raw='" + raw + '\'' +
+//                '}';
+//    }
+
+    public void soutAvlDataCount() {
+        int avlDataCount = Integer.parseInt(avlDataCountBegin);
+
+        for (int i = 1; i <= avlDataCount; i++) {
+            System.out.println(avlDataCount + " " + i + " of " + avlDataCount);
+        }
+
+        System.out.println();
+    }
+
+    private void splitAvlDataAggregated() {
+        String rawAvlData;
+        String str = avlDataAggregatedPlusBalance;
+
+        int avlDataCount = Integer.parseInt(avlDataCountBegin);
+
+        for (int i = 0; i < avlDataCount; i++) {
+            int elementCount = 0;
+            int elementCountRetain = 0;
+
+            rawAvlData = str.substring(0, 52);
+            str = str.substring(52);
+
+            for (int j = 1; j <= 4; j++) {
+                elementCount += Integer.parseInt(str.substring(0, 2), 16);
+                rawAvlData += str.substring(0, 2);
+                str = str.substring(2);
+
+                for (int k = elementCountRetain; k < elementCount; k++) {
+                    rawAvlData += str.substring(0, 2);
+                    str = str.substring(2); // eat ID
+
+                    // eat value
+                    int nChar = (int) Math.pow(2, j);
+                    String value = String.format("%0" + nChar + "d", Long.parseUnsignedLong(str.substring(0, nChar), 16));
+                    rawAvlData += str.substring(0, nChar);
+                    str = str.substring(nChar);
+                }
+
+                elementCountRetain = elementCount;
+            }
+
+            avlDataList.add(new AvlData(rawAvlData));
+        }
+
+        avlDataCountEnd = str.substring(0, 2);
+        crc = str.substring(2);
+    }
+
+    public void soutStd() {
+        String header = "imei='" + imei + '\'' +
+                ", length='" + avlDataLength + '\'' +
+                ", codec='" + codecID + '\'' +
+                ", cnt begin='" + avlDataCountBegin + '\'' +
+                ", cnt end='" + avlDataCountEnd + '\'' +
+                ", crc='" + crc + '\'' +
+                ", raw='" + raw + '\'';
+
+        System.out.println(header);
+
+        int size = avlDataList.size();
+        for (int i = 0; i < size; i++) {
+            System.out.println(size + "." + (i + 1) + " " + avlDataList.get(i));
+        }
+
+        System.out.println();
+    }
+
+}
