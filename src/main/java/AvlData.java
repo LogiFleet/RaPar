@@ -24,6 +24,8 @@ public class AvlData {
 
     public AvlData(String raw) {
         this.raw = raw;
+
+        //TODO Separate data and process -> service
         parse();
     }
 

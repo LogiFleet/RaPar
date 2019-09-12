@@ -29,7 +29,11 @@ public class AvlDataPacket {
         this.avlDataAggregatedPlusBalance = avlDataAggregated;
 
         this.avlDataList = new ArrayList<>();
-        splitAvlDataAggregated();
+
+        //TODO Separate data and process -> service
+        if (codecID.compareTo("08") == 0) splitAvlDataAggregated(); // Process only data frame Codec 08 encoded
+        // TODO !NOT CLEAN! improve with Codec 0c (12) GPRS command decoding (device acknowledge)
+        else if (codecID.compareTo("0c") == 0) this.raw = Converter.hexToAscii(avlDataAggregated);    // Convert Codec 0c (12) GPRS command (device acknowledge) into ASCII String
     }
 
     @Override
@@ -112,7 +116,7 @@ public class AvlDataPacket {
     }
 
     public void soutStd() {
-        String header = "imei='" + imei + '\'' +
+        String header = (codecID.compareTo("08") != 0 ? ">>>>!> " : "") + "imei='" + imei + '\'' + // NO Codec 08 line starts with special mark
                 ", length='" + avlDataLength + '\'' +
                 ", codec='" + codecID + '\'' +
                 ", cnt begin='" + avlDataCountBegin + '\'' +
