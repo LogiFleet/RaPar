@@ -80,7 +80,7 @@ public class AvlDataPacket {
         String rawAvlData;
         String str = avlDataAggregatedPlusBalance;
 
-        int avlDataCount = Integer.parseInt(avlDataCountBegin);
+        int avlDataCount = Integer.parseUnsignedInt(avlDataCountBegin, 16);
 
         for (int i = 0; i < avlDataCount; i++) {
             int elementCount = 0;
