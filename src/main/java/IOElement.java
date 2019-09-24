@@ -1,5 +1,6 @@
 
 import java.util.LinkedHashMap;
+import java.util.stream.Collectors;
 
 public class IOElement {
 
@@ -37,30 +38,21 @@ public class IOElement {
                 "event=" + String.format("%03d", eventID) +
                 ", elmnt cnt=" + elementCount +
                 ", 1B cnt=" + oneByteElementCount +
-                ", 1B elmnt=" + oneByteElement +
+                ", 1B elmnt=" + toStringWithKeyOnThreeDigits(oneByteElement) +
                 ", 2B cnt=" + twoByteElementCount +
-                ", 2B elmnt=" + twoByteElement +
+                ", 2B elmnt=" + toStringWithKeyOnThreeDigits(twoByteElement) +
                 ", 4B cnt=" + fourByteElementCount +
-                ", 4B elmnt=" + fourByteElement +
+                ", 4B elmnt=" + toStringWithKeyOnThreeDigits(fourByteElement) +
                 ", 8B cnt=" + eightByteElementCount +
-                ", 8B elmnt=" + eightByteElement +
+                ", 8B elmnt=" + toStringWithKeyOnThreeDigits(eightByteElement) +
                 '}';
     }
 
-//    @Override
-//    public String toString() {
-//        return "IOElement{" +
-//                "eventID=" + String.format("%03d", eventID) +
-//                ", elementCount=" + elementCount +
-//                ", oneByteElementCount=" + oneByteElementCount +
-//                ", oneByteElement=" + oneByteElement +
-//                ", twoByteElementCount=" + twoByteElementCount +
-//                ", twoByteElement=" + twoByteElement +
-//                ", fourByteElementCount=" + fourByteElementCount +
-//                ", fourByteElement=" + fourByteElement +
-//                ", eightByteElementCount=" + eightByteElementCount +
-//                ", eightByteElement=" + eightByteElement +
-//                '}';
-//    }
+    public String toStringWithKeyOnThreeDigits(LinkedHashMap<Integer, String> map) {
+        String mapAsString = map.keySet().stream()
+                .map(key -> String.format("%03d", key) + "=" + map.get(key))
+                .collect(Collectors.joining(", ", "{", "}"));
+        return mapAsString;
+    }
 
 }
