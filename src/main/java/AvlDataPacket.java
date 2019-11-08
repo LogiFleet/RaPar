@@ -100,7 +100,13 @@ public class AvlDataPacket {
 
                     // eat value
                     int nChar = (int) Math.pow(2, j);
-                    String value = String.format("%0" + nChar + "d", Long.parseUnsignedLong(str.substring(0, nChar), 16));
+
+                    try {
+                        String.format("%0" + nChar + "d", Long.parseUnsignedLong(str.substring(0, nChar), 16));
+                    } catch (NumberFormatException e) {
+                        e.printStackTrace();
+                    }
+
                     rawAvlData += str.substring(0, nChar);
                     str = str.substring(nChar);
                 }
