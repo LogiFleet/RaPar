@@ -67,7 +67,14 @@ public class AvlData {
         priority = raw.substring(16, 18);
         longitude = (float)(Integer.parseInt(raw.substring(18, 26), 16)) / 10000000;
         latitude = (float)(Integer.parseInt(raw.substring(26, 34), 16)) / 10000000;
-        altitude = Short.parseShort(raw.substring(34, 38), 16);
+
+        // fix negative altitude eg. "alt=-045"
+        try {
+            altitude = (short)(Integer.parseInt(raw.substring(34, 38), 16));
+        } catch (NumberFormatException e) {
+            e.printStackTrace();
+        }
+
         angle = Short.parseShort(raw.substring(38, 42), 16);
         satellite = Byte.parseByte(raw.substring(42, 44), 16);
         speed = Short.parseShort(raw.substring(44, 48), 16);
@@ -119,6 +126,10 @@ public class AvlData {
         }
 
         return xByteElement;
+    }
+
+    public IOElement getIoElement() {
+        return ioElement;
     }
 
 }

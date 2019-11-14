@@ -19,7 +19,11 @@ public class IOElement {
     private int eightByteElementCount;
     private LinkedHashMap<Integer, String> eightByteElement;
 
-    public IOElement(int eventID, int elementCount, int oneByteElementCount, LinkedHashMap<Integer, String> oneByteElement, int twoByteElementCount, LinkedHashMap<Integer, String> twoByteElement, int fourByteElementCount, LinkedHashMap<Integer, String> fourByteElement, int eightByteElementCount, LinkedHashMap<Integer, String> eightByteElement) {
+    public IOElement(int eventID, int elementCount,
+                     int oneByteElementCount, LinkedHashMap<Integer, String> oneByteElement,
+                     int twoByteElementCount, LinkedHashMap<Integer, String> twoByteElement,
+                     int fourByteElementCount, LinkedHashMap<Integer, String> fourByteElement,
+                     int eightByteElementCount, LinkedHashMap<Integer, String> eightByteElement) {
         this.eventID = eventID;
         this.elementCount = elementCount;
         this.oneByteElementCount = oneByteElementCount;
@@ -53,6 +57,14 @@ public class IOElement {
                 .map(key -> String.format("%03d", key) + "=" + map.get(key))
                 .collect(Collectors.joining(", ", "{", "}"));
         return mapAsString;
+    }
+
+    public int getFourByteElementCount() {
+        return fourByteElementCount;
+    }
+
+    public int getEventID() {
+        return eventID;
     }
 
 }

@@ -140,4 +140,16 @@ public class AvlDataPacket {
         System.out.println();
     }
 
+    public List<AvlData> getAvlDataList() {
+        return avlDataList;
+    }
+
+    public String getCodecID() {
+        return codecID;
+    }
+
+    public String getImei() {
+        return imei;
+    }
+
 }
