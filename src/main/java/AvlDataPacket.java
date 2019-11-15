@@ -1,4 +1,6 @@
 
+import java.io.IOException;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -121,7 +123,7 @@ public class AvlDataPacket {
         crc = str.substring(2);
     }
 
-    public void soutStd() {
+    public void soutStd(Writer writer, int fileLineNumber, int fileLineTreated) {
         String header = (codecID.compareTo("08") != 0 ? ">>>>!> " : "") + "imei='" + imei + '\'' + // NO Codec 08 line starts with special mark
                 ", length='" + avlDataLength + '\'' +
                 ", codec='" + codecID + '\'' +
@@ -130,14 +132,16 @@ public class AvlDataPacket {
                 ", crc='" + crc + '\'' +
                 ", raw='" + raw + '\'';
 
-        System.out.println(header);
-
-        int size = avlDataList.size();
-        for (int i = 0; i < size; i++) {
-            System.out.println(size + "." + (i + 1) + " " + avlDataList.get(i));
+        try {
+            writer.write((fileLineNumber + " / " + fileLineTreated) + ": " + header + "\r\n");
+            int size = avlDataList.size();
+            for (int i = 0; i < size; i++) {
+                writer.write(size + "." + (i + 1) + " " + avlDataList.get(i) + "\r\n");
+            }
+            writer.write("\r\n");
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-
-        System.out.println();
     }
 
     public List<AvlData> getAvlDataList() {

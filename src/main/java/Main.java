@@ -2,47 +2,50 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.LineIterator;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.Writer;
+import java.nio.file.Files;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class Main {
+    private static String DATE_TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
     private static String INPUT_FILE_NAME = "sampleLog.txt";
+    private static String OUTPUT_FILE_NAME = "output.txt";
     private static int IGNITION_CODE = 239;
-    private static int TESTING_OCCURRENCE = 5000;
+    private static String NUMBER_OF_FILE_LINES_TO_TREAT = "5000";    // "*" for all
     private static int N_WORST = 10;
+    private static HashMap<String, Integer> imeiOccurence;
 
-    private static int fileLineNumber = 0;
-    private static int fileLineTreated = 0;
-
-    private static HashMap<String, Integer> imeiOccurancy;
-
-    private static void treatmentSwitch(AvlDataPacket avlDataPacket) {
+    private static int treatmentSwitch(AvlDataPacket avlDataPacket, Writer writer, int fileLineNumber, int matchLine) {
 
         // Standard
-//        fileLineTreated++;
-//        standardOutput(avlDataPacket);
+        matchLine++;
+        avlDataPacket.soutStd(writer, fileLineNumber, matchLine);
 
         // ### Missing odometer issue
-        if (!containFourByteElements(avlDataPacket)
-                && !isGPRSCommandAcknowledgeMessage(avlDataPacket)
-                && atLeastOneIgnitionEventInPacket(avlDataPacket)) {
-            fileLineTreated++;
-//            standardOutput(avlDataPacket);
-
-            // ### Additional data extraction for further analysis
-
-            if (!imeiOccurancy.containsKey(avlDataPacket.getImei())) {
-                imeiOccurancy.put(avlDataPacket.getImei(), 1);
-            } else {
-                imeiOccurancy.computeIfPresent(avlDataPacket.getImei(), (k, v) -> v + 1);
-            }
-
-            // ###
-        }
+//        if (!containFourByteElements(avlDataPacket)
+//                && !isGPRSCommandAcknowledgeMessage(avlDataPacket)
+//                && atLeastOneIgnitionEventInPacket(avlDataPacket)) {
+//
+//            matchLine++;
+//            avlDataPacket.soutStd(writer, fileLineNumber, matchLine);
+//
+//            // ### Additional data extraction for further analysis
+//
+//            if (!imeiOccurence.containsKey(avlDataPacket.getImei())) {
+//                imeiOccurence.put(avlDataPacket.getImei(), 1);
+//            } else {
+//                imeiOccurence.computeIfPresent(avlDataPacket.getImei(), (k, v) -> v + 1);
+//            }
+//
+//            // ###
+//        }
         // ###
 
+        return matchLine;
     }
 
     private static boolean atLeastOneIgnitionEventInPacket(AvlDataPacket avlDataPacket) {
@@ -82,21 +85,30 @@ public class Main {
         return fourByteElementCount != 0;
     }
 
-    /**
-     * Standard output.
-     * @param avlDataPacket
-     */
-    private static void standardOutput(AvlDataPacket avlDataPacket) {
-        System.out.println(fileLineNumber + " / " + fileLineTreated);
-        avlDataPacket.soutStd();
-    }
-
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         List<AvlDataPacket> list = new ArrayList<>();
-        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        DateTimeFormatter fmt = DateTimeFormatter.ofPattern(DATE_TIME_FORMAT);
         File file = new File(Main.class.getClassLoader().getResource(INPUT_FILE_NAME).getFile());
         LineIterator it = null;
-        imeiOccurancy = new HashMap<>();
+        imeiOccurence = new HashMap<>();
+        long fileLineCount=0;
+        Writer fileWriter = new FileWriter(OUTPUT_FILE_NAME, false); //overwrites file
+        int fileLineNumber = 0;
+        int matchLine = 0;
+        char[] animationChars = new char[]{'|', '/', '-', '\\'};
+        int processedPercentage = 0;
+        long lineToTreat = 0;
+
+        try (Stream<String> lines = Files.lines(file.toPath())) {
+            fileLineCount = lines.count();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        lineToTreat = "*".equals(NUMBER_OF_FILE_LINES_TO_TREAT) ? fileLineCount : Long.parseLong(NUMBER_OF_FILE_LINES_TO_TREAT);
+        lineToTreat = lineToTreat > fileLineCount ? fileLineCount : lineToTreat;
+
+                System.out.println(lineToTreat + " lines of " + fileLineCount);
 
         try {
             it = FileUtils.lineIterator(file, "UTF-8");
@@ -105,7 +117,7 @@ public class Main {
         }
 
         try {
-            while (it.hasNext() && fileLineTreated < TESTING_OCCURRENCE) {
+            while (it.hasNext() && fileLineNumber < lineToTreat) {
                 String str = it.nextLine();
                 AvlDataPacket avlDataPacket = new AvlDataPacket(str,
                     str.substring(0, 15),
@@ -116,27 +128,36 @@ public class Main {
                     str.substring(36));
 
                 fileLineNumber++;
-                treatmentSwitch(avlDataPacket);
+                matchLine = treatmentSwitch(avlDataPacket, fileWriter, fileLineNumber, matchLine);
+
+                processedPercentage = (int)Math.round((((double)fileLineNumber / (double)lineToTreat) * 100.0));
+                System.out.print("Processing: " + processedPercentage + "% " + animationChars[processedPercentage % 4] + "\r");
             }
         } finally {
             LineIterator.closeQuietly(it);
         }
 
+        System.out.println("Processing: Done!          ");
+
         System.out.println();
         System.out.println("Total");
-        System.out.println(fileLineNumber + " / " + fileLineTreated);
+        System.out.println(matchLine + " matched in " + lineToTreat);
 
-        System.out.println();
-        System.out.println("the " + N_WORST + " worst");
+        fileWriter.close();
 
-        final IntWrapper dWrapper = new IntWrapper(N_WORST);
+//        System.out.println();
+//        System.out.println("the " + N_WORST + " worst");
+//
+//        final IntWrapper dWrapper = new IntWrapper(N_WORST);
+//
+//        imeiOccurence.entrySet()
+//                .stream().limit(N_WORST)
+//                .sorted(Collections.reverseOrder(Map.Entry.comparingByValue()))
+//                .forEach(k -> {
+//                    System.out.println(String.format("%03d", dWrapper.value) + ". " + k.getKey() + " = " + k.getValue());
+//                    dWrapper.value--;
+//                });
 
-        imeiOccurancy.entrySet()
-                .stream().limit(N_WORST)
-                .sorted(Collections.reverseOrder(Map.Entry.comparingByValue()))
-                .forEach(k -> {
-                    System.out.println(String.format("%03d", dWrapper.value) + ". " + k.getKey() + " = " + k.getValue());
-                    dWrapper.value--;
-                });
     }
+
 }
