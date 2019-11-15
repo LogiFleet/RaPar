@@ -128,8 +128,52 @@ public class AvlData {
         return xByteElement;
     }
 
+    public String getRaw() {
+        return raw;
+    }
+
+    public String getTimeStamp() {
+        return timeStamp;
+    }
+
+    public String getPriority() {
+        return priority;
+    }
+
+    public float getLongitude() {
+        return longitude;
+    }
+
+    public float getLatitude() {
+        return latitude;
+    }
+
+    public Short getAltitude() {
+        return altitude;
+    }
+
+    public Short getAngle() {
+        return angle;
+    }
+
+    public Byte getSatellite() {
+        return satellite;
+    }
+
+    public Short getSpeed() {
+        return speed;
+    }
+
+    public String getIoElementRaw() {
+        return ioElementRaw;
+    }
+
     public IOElement getIoElement() {
         return ioElement;
+    }
+
+    public DateTimeFormatter getFmt() {
+        return fmt;
     }
 
 }

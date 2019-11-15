@@ -1,3 +1,5 @@
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.LineIterator;
 
@@ -13,9 +15,10 @@ import java.util.stream.Stream;
 public class Main {
     private static String DATE_TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
     private static String INPUT_FILE_NAME = "sampleLog.txt";
-    private static String OUTPUT_FILE_NAME = "output.txt";
+    private static String OUTPUT_TXT_FILE_NAME = "output.txt";
+    private static String OUTPUT_JSON_FILE_NAME = "output.json";
     private static int IGNITION_CODE = 239;
-    private static String NUMBER_OF_FILE_LINES_TO_TREAT = "5000";    // "*" for all
+    private static String NUMBER_OF_FILE_LINES_TO_TREAT = "10";    // "*" for all
     private static int N_WORST = 10;
     private static HashMap<String, Integer> imeiOccurence;
 
@@ -92,12 +95,14 @@ public class Main {
         LineIterator it = null;
         imeiOccurence = new HashMap<>();
         long fileLineCount=0;
-        Writer fileWriter = new FileWriter(OUTPUT_FILE_NAME, false); //overwrites file
+        Writer fileTxtWriter = new FileWriter(OUTPUT_TXT_FILE_NAME, false); //overwrites file
+        Writer fileJsontWriter = new FileWriter(OUTPUT_JSON_FILE_NAME, false); //overwrites file
         int fileLineNumber = 0;
         int matchLine = 0;
         char[] animationChars = new char[]{'|', '/', '-', '\\'};
         int processedPercentage = 0;
         long lineToTreat = 0;
+        ObjectMapper mapper = new ObjectMapper();
 
         try (Stream<String> lines = Files.lines(file.toPath())) {
             fileLineCount = lines.count();
@@ -108,7 +113,7 @@ public class Main {
         lineToTreat = "*".equals(NUMBER_OF_FILE_LINES_TO_TREAT) ? fileLineCount : Long.parseLong(NUMBER_OF_FILE_LINES_TO_TREAT);
         lineToTreat = lineToTreat > fileLineCount ? fileLineCount : lineToTreat;
 
-                System.out.println(lineToTreat + " lines of " + fileLineCount);
+        System.out.println(lineToTreat + " lines of " + fileLineCount);
 
         try {
             it = FileUtils.lineIterator(file, "UTF-8");
@@ -128,10 +133,18 @@ public class Main {
                     str.substring(36));
 
                 fileLineNumber++;
-                matchLine = treatmentSwitch(avlDataPacket, fileWriter, fileLineNumber, matchLine);
+                matchLine = treatmentSwitch(avlDataPacket, fileTxtWriter, fileLineNumber, matchLine);
 
                 processedPercentage = (int)Math.round((((double)fileLineNumber / (double)lineToTreat) * 100.0));
                 System.out.print("Processing: " + processedPercentage + "% " + animationChars[processedPercentage % 4] + "\r");
+
+                try {
+                    //TODO JSON output improve, do not jsonify every fields!
+                    fileJsontWriter.write(mapper.writeValueAsString(avlDataPacket) + "\r\n");
+                } catch (JsonProcessingException e) {
+                    e.printStackTrace();
+                }
+
             }
         } finally {
             LineIterator.closeQuietly(it);
@@ -143,7 +156,8 @@ public class Main {
         System.out.println("Total");
         System.out.println(matchLine + " matched in " + lineToTreat);
 
-        fileWriter.close();
+        fileTxtWriter.close();
+        fileJsontWriter.close();
 
 //        System.out.println();
 //        System.out.println("the " + N_WORST + " worst");

@@ -144,16 +144,44 @@ public class AvlDataPacket {
         }
     }
 
-    public List<AvlData> getAvlDataList() {
-        return avlDataList;
+    public String getRaw() {
+        return raw;
+    }
+
+    public String getImei() {
+        return imei;
+    }
+
+    public String getPreamble() {
+        return preamble;
+    }
+
+    public String getAvlDataLength() {
+        return avlDataLength;
     }
 
     public String getCodecID() {
         return codecID;
     }
 
-    public String getImei() {
-        return imei;
+    public String getAvlDataCountBegin() {
+        return avlDataCountBegin;
+    }
+
+    public String getAvlDataAggregatedPlusBalance() {
+        return avlDataAggregatedPlusBalance;
+    }
+
+    public List<AvlData> getAvlDataList() {
+        return avlDataList;
+    }
+
+    public String getAvlDataCountEnd() {
+        return avlDataCountEnd;
+    }
+
+    public String getCrc() {
+        return crc;
     }
 
 }

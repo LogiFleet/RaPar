@@ -59,12 +59,44 @@ public class IOElement {
         return mapAsString;
     }
 
+    public int getEventID() {
+        return eventID;
+    }
+
+    public int getElementCount() {
+        return elementCount;
+    }
+
+    public int getOneByteElementCount() {
+        return oneByteElementCount;
+    }
+
+    public LinkedHashMap<Integer, String> getOneByteElement() {
+        return oneByteElement;
+    }
+
+    public int getTwoByteElementCount() {
+        return twoByteElementCount;
+    }
+
+    public LinkedHashMap<Integer, String> getTwoByteElement() {
+        return twoByteElement;
+    }
+
     public int getFourByteElementCount() {
         return fourByteElementCount;
     }
 
-    public int getEventID() {
-        return eventID;
+    public LinkedHashMap<Integer, String> getFourByteElement() {
+        return fourByteElement;
+    }
+
+    public int getEightByteElementCount() {
+        return eightByteElementCount;
+    }
+
+    public LinkedHashMap<Integer, String> getEightByteElement() {
+        return eightByteElement;
     }
 
 }
