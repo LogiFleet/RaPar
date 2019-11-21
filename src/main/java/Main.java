@@ -18,7 +18,7 @@ public class Main {
     private static String OUTPUT_TXT_FILE_NAME = "output.txt";
     private static String OUTPUT_JSON_FILE_NAME = "output.json";
     private static int IGNITION_CODE = 239;
-    private static String NUMBER_OF_FILE_LINES_TO_TREAT = "10";    // "*" for all
+    private static String NUMBER_OF_FILE_LINES_TO_TREAT = "*";    // "*" for all
     private static int N_WORST = 10;
     private static HashMap<String, Integer> imeiOccurence;
 
