@@ -121,6 +121,8 @@ public class Main {
             e.printStackTrace();
         }
 
+        fileJsontWriter.write('[');  // JSON array begin
+
         try {
             while (it.hasNext() && fileLineNumber < lineToTreat) {
                 String str = it.nextLine();
@@ -140,7 +142,11 @@ public class Main {
 
                 try {
                     //TODO JSON output improve, do not jsonify every fields!
-                    fileJsontWriter.write(mapper.writeValueAsString(avlDataPacket) + "\r\n");
+                    if (it.hasNext()) {
+                        fileJsontWriter.write(mapper.writeValueAsString(avlDataPacket) + ",\r\n");
+                    } else {
+                        fileJsontWriter.write(mapper.writeValueAsString(avlDataPacket));
+                    }
                 } catch (JsonProcessingException e) {
                     e.printStackTrace();
                 }
@@ -150,8 +156,9 @@ public class Main {
             LineIterator.closeQuietly(it);
         }
 
-        System.out.println("Processing: Done!          ");
+        fileJsontWriter.write(']');  // JSON array end
 
+        System.out.println("Processing: Done!");
         System.out.println();
         System.out.println("Total");
         System.out.println(matchLine + " matched in " + lineToTreat);
