@@ -132,11 +132,27 @@ public class AvlDataPacket {
                 ", crc='" + crc + '\'' +
                 ", raw='" + raw + '\'';
 
+        //todo NO 08 codec special treatment handling (c.f. above for header string construction)
+
         try {
 //            writer.write((fileLineNumber + " / " + fileLineTreated) + ": " + header + "\r\n");
             int size = avlDataList.size();
             for (int i = 0; i < size; i++) {
-                writer.write(avlDataList.get(i) + "\r\n");
+                writer.write(
+                        '{' +
+
+                            "\"imei\":\"" + imei + "\",\"messageTotal\":" + size + ",\"messageIndex\":" + (i + 1) + ',' + avlDataList.get(i) +
+
+                            ",\"length\":\"" + avlDataLength + '\"' +
+                            ",\"codec\":\"" + codecID + '\"' +
+                            ",\"cntBegin\":\"" + avlDataCountBegin + '\"' +
+                            ",\"cntEnd\":\"" + avlDataCountEnd + '\"' +
+                            ",\"crc\":\"" + crc + '\"' +
+                            ",\"raw\":\"" + raw + "\"" +
+
+                        '}' +
+
+                        "\r\n");
             }
 //            writer.write("\r\n");
         } catch (IOException e) {

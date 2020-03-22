@@ -31,8 +31,7 @@ public class AvlData {
 
     @Override
     public String toString() {
-        return "{" +
-                "\"timeStamp\":\"" + timeStamp + '\"' +
+        return  "\"timeStamp\":\"" + timeStamp + '\"' +
                 ",\"priority\":\"" + priority + '\"' +
                 ",\"latitude\":" + String.format("%.7f", latitude) +
                 ",\"longitude\":" + String.format("%.7f", longitude) +
@@ -40,8 +39,7 @@ public class AvlData {
                 ",\"angle\":" + String.format("%3d", angle) +
                 ",\"satellite\":" + String.format("%2d", satellite) +
                 ",\"speed\":" + String.format("%3d", speed) +
-                "," + ioElement +
-                '}';
+                "," + ioElement;
     }
 
 //    @Override
