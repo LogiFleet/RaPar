@@ -134,6 +134,10 @@ public class AvlDataPacket {
 
         //todo NO 08 codec special treatment handling (c.f. above for header string construction)
 
+//        if (codecID.compareTo("08") != 0) {
+//            System.out.println("codec not equal to 08");
+//        }
+
         try {
 //            writer.write((fileLineNumber + " / " + fileLineTreated) + ": " + header + "\r\n");
             int size = avlDataList.size();
