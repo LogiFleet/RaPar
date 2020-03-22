@@ -38,24 +38,23 @@ public class IOElement {
 
     @Override
     public String toString() {
-        return "elmnt{" +
-                "event=" + String.format("%03d", eventID) +
-                ", elmnt cnt=" + elementCount +
-                ", 1B cnt=" + oneByteElementCount +
-                ", 1B elmnt=" + toStringWithKeyOnThreeDigits(oneByteElement) +
-                ", 2B cnt=" + twoByteElementCount +
-                ", 2B elmnt=" + toStringWithKeyOnThreeDigits(twoByteElement) +
-                ", 4B cnt=" + fourByteElementCount +
-                ", 4B elmnt=" + toStringWithKeyOnThreeDigits(fourByteElement) +
-                ", 8B cnt=" + eightByteElementCount +
-                ", 8B elmnt=" + toStringWithKeyOnThreeDigits(eightByteElement) +
-                '}';
+        return "\"eventID\":" + String.format("%3d", eventID) +
+                ",\"elementCount\":" + elementCount +
+                ",\"oneByteElementCount\":" + oneByteElementCount +
+                ',' + toStringWithKeyOnThreeDigits(oneByteElement) +
+                ",\"twoByteElementCount\":" + twoByteElementCount +
+                ',' + toStringWithKeyOnThreeDigits(twoByteElement) +
+                ",\"fourByteElementCount\":" + fourByteElementCount +
+                ',' + toStringWithKeyOnThreeDigits(fourByteElement);
+                //todo Handle case where no (eight byte) element
+//                ",\"eightByteElementCount\":" + eightByteElementCount +
+//                ',' + toStringWithKeyOnThreeDigits(eightByteElement) +
     }
 
     public String toStringWithKeyOnThreeDigits(LinkedHashMap<Integer, String> map) {
         String mapAsString = map.keySet().stream()
-                .map(key -> String.format("%03d", key) + "=" + map.get(key))
-                .collect(Collectors.joining(", ", "{", "}"));
+                .map(key -> String.format("\"%03d\"", key) + ":" + map.get(key))
+                .collect(Collectors.joining(","));
         return mapAsString;
     }
 

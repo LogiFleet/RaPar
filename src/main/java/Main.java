@@ -121,8 +121,6 @@ public class Main {
             e.printStackTrace();
         }
 
-        fileJsontWriter.write('[');  // JSON array begin
-
         try {
             while (it.hasNext() && fileLineNumber < lineToTreat) {
                 String str = it.nextLine();
@@ -142,11 +140,7 @@ public class Main {
 
                 try {
                     //TODO JSON output improve, do not jsonify every fields!
-                    if (it.hasNext()) {
-                        fileJsontWriter.write(mapper.writeValueAsString(avlDataPacket) + ",\r\n");
-                    } else {
-                        fileJsontWriter.write(mapper.writeValueAsString(avlDataPacket));
-                    }
+                    fileJsontWriter.write(mapper.writeValueAsString(avlDataPacket) + "\r\n");
                 } catch (JsonProcessingException e) {
                     e.printStackTrace();
                 }
@@ -155,8 +149,6 @@ public class Main {
         } finally {
             LineIterator.closeQuietly(it);
         }
-
-        fileJsontWriter.write(']');  // JSON array end
 
         System.out.println("Processing: Done!");
         System.out.println();

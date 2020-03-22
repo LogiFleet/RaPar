@@ -133,12 +133,12 @@ public class AvlDataPacket {
                 ", raw='" + raw + '\'';
 
         try {
-            writer.write((fileLineNumber + " / " + fileLineTreated) + ": " + header + "\r\n");
+//            writer.write((fileLineNumber + " / " + fileLineTreated) + ": " + header + "\r\n");
             int size = avlDataList.size();
             for (int i = 0; i < size; i++) {
-                writer.write(size + "." + (i + 1) + " " + avlDataList.get(i) + "\r\n");
+                writer.write(avlDataList.get(i) + "\r\n");
             }
-            writer.write("\r\n");
+//            writer.write("\r\n");
         } catch (IOException e) {
             e.printStackTrace();
         }

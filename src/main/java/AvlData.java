@@ -31,16 +31,16 @@ public class AvlData {
 
     @Override
     public String toString() {
-        return "data{" +
-                "time='" + timeStamp + '\'' +
-                ", prio='" + priority + '\'' +
-                // Below output (lat, long) could directly be copied/pasted to https://www.google.com/maps/
-                ", lat long=" + String.format("%.7f", latitude) + ", " + String.format("%.7f", longitude) +
-                ", alt=" + String.format("%04d", altitude) +
-                ", angle=" + String.format("%03d", angle) +
-                ", sat=" + String.format("%02d", satellite) +
-                ", speed=" + String.format("%03d", speed) +
-                ", io=" + ioElement +
+        return "{" +
+                "\"timeStamp\":\"" + timeStamp + '\"' +
+                ",\"priority\":\"" + priority + '\"' +
+                ",\"latitude\":" + String.format("%.7f", latitude) +
+                ",\"longitude\":" + String.format("%.7f", longitude) +
+                ",\"altitude\":" + String.format("%4d", altitude) +
+                ",\"angle\":" + String.format("%3d", angle) +
+                ",\"satellite\":" + String.format("%2d", satellite) +
+                ",\"speed\":" + String.format("%3d", speed) +
+                "," + ioElement +
                 '}';
     }
 
@@ -119,7 +119,8 @@ public class AvlData {
             int key = Integer.parseInt(str.substring(0, 2), 16);
             str = str.substring(2);
 
-            String value = String.format("%0" + size + "d", Long.parseUnsignedLong(str.substring(0, size), 16));
+            String value = String.valueOf(Long.parseUnsignedLong(str.substring(0, size), 16));
+
             str = str.substring(size);
 
             xByteElement.put(key, value);
