@@ -13,7 +13,10 @@ import java.util.*;
 import java.util.stream.Stream;
 
 public class Main {
+    public static LinkedHashMap<Integer, String> DEVICE_AVL_ID;
+
     private static String DATE_TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
+    private static String PROPERTY_ID_FILE_NAME = "Teltonika-FMM130-AVL-ID.txt";
     private static String INPUT_FILE_NAME = "sampleLog.txt";
     private static String OUTPUT_TXT_FILE_NAME = "output.txt";
     private static String OUTPUT_JSON_FILE_NAME = "output.json";
@@ -89,6 +92,10 @@ public class Main {
     }
 
     public static void main(String[] args) throws IOException {
+
+        File propertyIdFile = new File(Main.class.getClassLoader().getResource(PROPERTY_ID_FILE_NAME).getFile());
+        DEVICE_AVL_ID = new LinkedHashMap<>();
+
         List<AvlDataPacket> list = new ArrayList<>();
         DateTimeFormatter fmt = DateTimeFormatter.ofPattern(DATE_TIME_FORMAT);
         File file = new File(Main.class.getClassLoader().getResource(INPUT_FILE_NAME).getFile());
@@ -103,6 +110,38 @@ public class Main {
         int processedPercentage = 0;
         long lineToTreat = 0;
         ObjectMapper mapper = new ObjectMapper();
+
+        // ### Device AVL ID file
+
+        try {
+            it = FileUtils.lineIterator(propertyIdFile, "UTF-8");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            while (it.hasNext()) {
+                String str = it.nextLine();
+                String[] parts = str.split(":");
+
+                Integer key = Integer.parseInt( parts[0].trim());
+                String value = parts[1].trim();
+
+                DEVICE_AVL_ID.put(key, value);
+            }
+        } finally {
+            LineIterator.closeQuietly(it);
+        }
+
+        // sout DEVICE_AVL_ID
+//        for (Map.Entry<Integer, String> entry : DEVICE_AVL_ID.entrySet()) {
+//            Integer key = entry.getKey();
+//            String value = entry.getValue();
+//
+//            System.out.println(key + " -> " + value);
+//        }
+
+        // ###
 
         try (Stream<String> lines = Files.lines(file.toPath())) {
             fileLineCount = lines.count();

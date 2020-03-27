@@ -112,12 +112,18 @@ public class AvlData {
 
     private LinkedHashMap<Integer, String> parseXbIOElement(String str, int count, int size) {
         LinkedHashMap<Integer, String> xByteElement = new LinkedHashMap<>();
+        String value;
 
         for (int i = 0; i < count; i++) {
             int key = Integer.parseInt(str.substring(0, 2), 16);
             str = str.substring(2);
 
-            String value = String.valueOf(Long.parseUnsignedLong(str.substring(0, size), 16));
+            if (key != 78) {    // 78 Property ID is iButton ID for Teltonika FMM130
+                value = String.valueOf(Long.parseUnsignedLong(str.substring(0, size), 16));
+            } else {
+                String hexID = str.substring(0, size);
+                value = "0000000000000000".compareTo(hexID) == 0 ? "0" : hexID.toUpperCase();
+            }
 
             str = str.substring(size);
 

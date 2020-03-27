@@ -38,22 +38,20 @@ public class IOElement {
 
     @Override
     public String toString() {
-        return "\"eventID\":" + String.format("%3d", eventID) +
+        return "\"eventID\":" + (Main.DEVICE_AVL_ID.containsKey(eventID) ? '"' + Main.DEVICE_AVL_ID.get(eventID) + '"' : String.format("\"%d\"", eventID)) +
                 ",\"elementCount\":" + elementCount +
                 ",\"oneByteElementCount\":" + oneByteElementCount +
                 ',' + toStringWithKeyOnThreeDigits(oneByteElement) +
                 ",\"twoByteElementCount\":" + twoByteElementCount +
                 ',' + toStringWithKeyOnThreeDigits(twoByteElement) +
                 ",\"fourByteElementCount\":" + fourByteElementCount +
-                ',' + toStringWithKeyOnThreeDigits(fourByteElement);
-                //todo Handle case where no (eight byte) element
-//                ",\"eightByteElementCount\":" + eightByteElementCount +
-//                ',' + toStringWithKeyOnThreeDigits(eightByteElement) +
+                ',' + toStringWithKeyOnThreeDigits(fourByteElement) +
+                (eightByteElementCount !=0 ? ",\"eightByteElementCount\":" + eightByteElementCount + ',' + toStringWithKeyOnThreeDigits(eightByteElement) : "");
     }
 
     public String toStringWithKeyOnThreeDigits(LinkedHashMap<Integer, String> map) {
         String mapAsString = map.keySet().stream()
-                .map(key -> String.format("\"%03d\"", key) + ":" + map.get(key))
+                .map(key -> (Main.DEVICE_AVL_ID.containsKey(key) ? '"' + Main.DEVICE_AVL_ID.get(key) + '"' : String.format("\"%03d\"", key)) + ":" + (key == 78 ? ('"' + map.get(key) + '"') : map.get(key)))    // 78 Property ID is iButton ID for Teltonika FMM130
                 .collect(Collectors.joining(","));
         return mapAsString;
     }
