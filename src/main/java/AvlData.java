@@ -33,8 +33,10 @@ public class AvlData {
     public String toString() {
         return  "\"timeStamp\":\"" + timeStamp + '\"' +
                 ",\"priority\":\"" + priority + '\"' +
-                ",\"latitude\":" + String.format("%.7f", latitude) +
-                ",\"longitude\":" + String.format("%.7f", longitude) +
+                ",\"location\":{" +
+                    "\"lat\":" + String.format("%.7f", latitude) +
+                    ",\"lon\":" + String.format("%.7f", longitude) +
+                "}" +
                 ",\"altitude\":" + String.format("%4d", altitude) +
                 ",\"angle\":" + String.format("%3d", angle) +
                 ",\"satellite\":" + String.format("%2d", satellite) +
