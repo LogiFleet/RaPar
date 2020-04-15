@@ -149,8 +149,8 @@ public class AvlDataPacket {
 
                             ",\"length\":\"" + avlDataLength + '\"' +
                             ",\"codec\":\"" + codecID + '\"' +
-                            ",\"cntBegin\":\"" + avlDataCountBegin + '\"' +
-                            ",\"cntEnd\":\"" + avlDataCountEnd + '\"' +
+                            ",\"cntBegin\":" + Integer.parseInt(avlDataCountBegin, 16) +
+                            ",\"cntEnd\":" + Integer.parseInt(avlDataCountEnd,16) +
                             ",\"crc\":\"" + crc + '\"' +
                             ",\"raw\":\"" + raw + "\"" +
 
