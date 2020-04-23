@@ -3,10 +3,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.LineIterator;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.Writer;
+import java.io.*;
 import java.nio.file.Files;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -14,9 +11,11 @@ import java.util.stream.Stream;
 
 public class Main {
     public static LinkedHashMap<Integer, String> DEVICE_AVL_ID;
+    public static String MANUFACTURER;
+    public static String DEVICE;
 
     private static String DATE_TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
-    private static String PROPERTY_ID_FILE_NAME = "TLT-FMM130-AVL-ID.txt";
+    private static String PROPERTY_MANUFACTURERS_DEVICES_FILE_NAME = "ManufacturersDevices.properties";
     private static String INPUT_FILE_NAME = "in.log";
     private static String OUTPUT_TXT_FILE_NAME = "out.log";
     private static String OUTPUT_JSON_FILE_NAME = "output.json";
@@ -93,7 +92,52 @@ public class Main {
 
     public static void main(String[] args) throws IOException {
 
-        File propertyIdFile = new File(Main.class.getClassLoader().getResource(PROPERTY_ID_FILE_NAME).getFile());
+        // e.g. args[0]=tlt.fm3001, see ManufacturersDevices.properties for more
+
+        String deviceSelector = null;
+        String manufacturerDevice = null;
+
+        if(args.length == 0 || args[0] == null)
+        {
+            System.out.println();
+            System.out.println("Proper usage is args[0] as: manufacturer.device");
+            System.exit(0);
+        } else {
+            deviceSelector = args[0];
+        }
+
+        MANUFACTURER = deviceSelector.split("\\.")[0];
+        DEVICE = deviceSelector.split("\\.")[1];
+
+        System.out.println();
+        System.out.println("Selector:\t\t" + deviceSelector);
+        System.out.println("Manufacturer:\t" + MANUFACTURER);
+        System.out.println("Device:\t\t\t" + DEVICE);
+        System.out.println();
+
+        try (InputStream input = new FileInputStream(Main.class.getClassLoader().getResource(PROPERTY_MANUFACTURERS_DEVICES_FILE_NAME).getFile())) {
+            Properties prop = new Properties();
+
+            // load a properties file
+            prop.load(input);
+
+            // get the property value and print it out
+            manufacturerDevice = prop.getProperty(deviceSelector);
+            if(manufacturerDevice != null && !manufacturerDevice.isEmpty()) {
+                System.out.println(manufacturerDevice);
+                System.out.println();
+            }
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+
+        if(manufacturerDevice == null || manufacturerDevice.isEmpty())
+        {
+            System.out.println("Proper usage in ManufacturersDevices.properties file is: manufacturer.device=file name (avl-id)");
+            System.exit(0);
+        }
+
+        File propertyIdFile = new File(Main.class.getClassLoader().getResource(manufacturerDevice).getFile());
         DEVICE_AVL_ID = new LinkedHashMap<>();
 
         List<AvlDataPacket> list = new ArrayList<>();

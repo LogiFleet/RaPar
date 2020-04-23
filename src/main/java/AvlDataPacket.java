@@ -145,7 +145,10 @@ public class AvlDataPacket {
                 writer.write(
                         '{' +
 
-                            "\"imei\":\"" + imei + "\",\"messageTotal\":" + size + ",\"messageIndex\":" + (i + 1) + ',' + avlDataList.get(i) +
+                            "\"manufacturer\":\"" + Main.MANUFACTURER + '\"' +
+                            ",\"device\":\"" + Main.DEVICE + '\"' +
+
+                            ",\"imei\":\"" + imei + "\",\"messageTotal\":" + size + ",\"messageIndex\":" + (i + 1) + ',' + avlDataList.get(i) +
 
                             ",\"length\":\"" + avlDataLength + '\"' +
                             ",\"codec\":\"" + codecID + '\"' +
