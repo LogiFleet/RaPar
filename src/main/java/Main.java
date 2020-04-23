@@ -16,7 +16,7 @@ public class Main {
     public static LinkedHashMap<Integer, String> DEVICE_AVL_ID;
 
     private static String DATE_TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
-    private static String PROPERTY_ID_FILE_NAME = "Teltonika-FMM130-AVL-ID.txt";
+    private static String PROPERTY_ID_FILE_NAME = "TLT-FMM130-AVL-ID.txt";
     private static String INPUT_FILE_NAME = "in.log";
     private static String OUTPUT_TXT_FILE_NAME = "out.log";
     private static String OUTPUT_JSON_FILE_NAME = "output.json";

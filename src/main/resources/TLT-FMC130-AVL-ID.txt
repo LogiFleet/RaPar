@@ -111,7 +111,6 @@
 113:Battery_Level
 114:Engine_Load
 115:Engine_Temperature
-116:Charger_Connected
 118:Axle_1_Load
 119:Axle_2_Load
 120:Axle_3_Load
@@ -236,13 +235,11 @@
 239:Ignition
 240:Movement
 241:Active_GSM_Operator
-242:ManDown
 243:Green_driving_event_duration
 244:DIN2/AIN2_spec_event
 246:Towing
 247:Crash_detection
 248:Immobilizer
-249:Jamming
 250:Trip
 251:Idling
 252:Unplug
@@ -279,7 +276,6 @@
 307:BLE_Fuel_Frequency_#2
 308:BLE_Fuel_Frequency_#3
 309:BLE_Fuel_Frequency_#4
-310:Movement_Event
 317:Crash_event_counter
 325:VIN
 327:UL202-02_Sensor_Fuel_level
@@ -297,4 +293,17 @@
 385:Beacon
 387:ISO6709_Coordinates
 391:Private_mode
+403:Driver_Name
+404:Driver_card_license_type
+405:Driver_Gender
+406:Driver_Card_ID
+407:Driver_Card_Issue_Year
+408:Driver_Card_Issue_Year
+409:Driver_Status_Event
 483:UL202-02_Sensor_Status
+517:SecurityStateFlags_P4
+518:ControlStateFlags_P4
+519:IndicatorStateFlags_P4
+520:AgriculturalStateFlags_P4
+521:UtilityStateFlags_P4
+522:CisternStateFlags_P4
