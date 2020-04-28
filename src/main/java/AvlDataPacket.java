@@ -123,7 +123,9 @@ public class AvlDataPacket {
         crc = str.substring(2);
     }
 
-    public void soutStd(Writer writer, int fileLineNumber, int fileLineTreated) {
+    public int soutStd(Writer writer, int fileLineNumber, int fileLineTreated) {
+        int size = 0;
+
         String header = (codecID.compareTo("08") != 0 ? ">>>>!> " : "") + "imei='" + imei + '\'' + // NO Codec 08 line starts with special mark
                 ", length='" + avlDataLength + '\'' +
                 ", codec='" + codecID + '\'' +
@@ -140,12 +142,14 @@ public class AvlDataPacket {
 
         try {
 //            writer.write((fileLineNumber + " / " + fileLineTreated) + ": " + header + "\r\n");
-            int size = avlDataList.size();
+            size = avlDataList.size();
             for (int i = 0; i < size; i++) {
                 writer.write(
                         '{' +
 
-                            "\"manufacturer\":\"" + Main.MANUFACTURER + '\"' +
+                            "\"line\":" + (fileLineTreated + i) +
+
+                            ",\"manufacturer\":\"" + Main.MANUFACTURER + '\"' +
                             ",\"device\":\"" + Main.DEVICE + '\"' +
 
                             ",\"imei\":\"" + imei + "\",\"messageTotal\":" + size + ",\"messageIndex\":" + (i + 1) + ',' + avlDataList.get(i) +
@@ -165,6 +169,8 @@ public class AvlDataPacket {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        return --size;
     }
 
     public String getRaw() {

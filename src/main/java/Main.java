@@ -1,4 +1,3 @@
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.LineIterator;
@@ -18,7 +17,6 @@ public class Main {
     private static String PROPERTY_MANUFACTURERS_DEVICES_FILE_NAME = "ManufacturersDevices.properties";
     private static String INPUT_FILE_NAME = "in.log";
     private static String OUTPUT_TXT_FILE_NAME = "out.log";
-    private static String OUTPUT_JSON_FILE_NAME = "output.json";
     private static int IGNITION_CODE = 239;
     private static String NUMBER_OF_FILE_LINES_TO_TREAT = "*";    // "*" for all
     private static int N_WORST = 10;
@@ -28,7 +26,7 @@ public class Main {
 
         // Standard
         matchLine++;
-        avlDataPacket.soutStd(writer, fileLineNumber, matchLine);
+        int more = avlDataPacket.soutStd(writer, fileLineNumber, matchLine);
 
         // ### Missing odometer issue
 //        if (!containFourByteElements(avlDataPacket)
@@ -50,7 +48,7 @@ public class Main {
 //        }
         // ###
 
-        return matchLine;
+        return matchLine + more;
     }
 
     private static boolean atLeastOneIgnitionEventInPacket(AvlDataPacket avlDataPacket) {
@@ -147,7 +145,6 @@ public class Main {
         imeiOccurence = new HashMap<>();
         long fileLineCount=0;
         Writer fileTxtWriter = new FileWriter(OUTPUT_TXT_FILE_NAME, false); //overwrites file
-        Writer fileJsontWriter = new FileWriter(OUTPUT_JSON_FILE_NAME, false); //overwrites file
         int fileLineNumber = 0;
         int matchLine = 0;
         char[] animationChars = new char[]{'|', '/', '-', '\\'};
@@ -220,14 +217,6 @@ public class Main {
 
                 processedPercentage = (int)Math.round((((double)fileLineNumber / (double)lineToTreat) * 100.0));
                 System.out.print("Processing: " + processedPercentage + "% " + animationChars[processedPercentage % 4] + "\r");
-
-                try {
-                    //TODO JSON output improve, do not jsonify every fields!
-                    fileJsontWriter.write(mapper.writeValueAsString(avlDataPacket) + "\r\n");
-                } catch (JsonProcessingException e) {
-                    e.printStackTrace();
-                }
-
             }
         } finally {
             LineIterator.closeQuietly(it);
@@ -239,7 +228,6 @@ public class Main {
         System.out.println(matchLine + " matched in " + lineToTreat);
 
         fileTxtWriter.close();
-        fileJsontWriter.close();
 
 //        System.out.println();
 //        System.out.println("the " + N_WORST + " worst");
