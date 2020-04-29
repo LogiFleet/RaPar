@@ -123,9 +123,7 @@ public class AvlDataPacket {
         crc = str.substring(2);
     }
 
-    public int soutStd(Writer writer, int fileLineNumber, int fileLineTreated) {
-        int size = 0;
-
+    public void soutStd(Writer writer, int fileLineNumber, int fileLineTreated) {
         String header = (codecID.compareTo("08") != 0 ? ">>>>!> " : "") + "imei='" + imei + '\'' + // NO Codec 08 line starts with special mark
                 ", length='" + avlDataLength + '\'' +
                 ", codec='" + codecID + '\'' +
@@ -134,43 +132,16 @@ public class AvlDataPacket {
                 ", crc='" + crc + '\'' +
                 ", raw='" + raw + '\'';
 
-        //todo NO 08 codec special treatment handling (c.f. above for header string construction)
-
-//        if (codecID.compareTo("08") != 0) {
-//            System.out.println("codec not equal to 08");
-//        }
-
         try {
-//            writer.write((fileLineNumber + " / " + fileLineTreated) + ": " + header + "\r\n");
-            size = avlDataList.size();
+            writer.write((fileLineNumber + " / " + fileLineTreated) + ": " + header + "\r\n");
+            int size = avlDataList.size();
             for (int i = 0; i < size; i++) {
-                writer.write(
-                        '{' +
-
-                            "\"line\":" + (fileLineTreated + i) +
-
-                            ",\"manufacturer\":\"" + Main.MANUFACTURER + '\"' +
-                            ",\"device\":\"" + Main.DEVICE + '\"' +
-
-                            ",\"imei\":\"" + imei + "\",\"messageTotal\":" + size + ",\"messageIndex\":" + (i + 1) + ',' + avlDataList.get(i) +
-
-                            ",\"length\":\"" + avlDataLength + '\"' +
-                            ",\"codec\":\"" + codecID + '\"' +
-                            ",\"cntBegin\":" + Integer.parseInt(avlDataCountBegin, 16) +
-                            ",\"cntEnd\":" + Integer.parseInt(avlDataCountEnd,16) +
-                            ",\"crc\":\"" + crc + '\"' +
-                            ",\"raw\":\"" + raw + "\"" +
-
-                        '}' +
-
-                        "\r\n");
+                writer.write(size + "." + (i + 1) + " " + avlDataList.get(i) + "\r\n");
             }
-//            writer.write("\r\n");
+            writer.write("\r\n");
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-        return --size;
     }
 
     public String getRaw() {

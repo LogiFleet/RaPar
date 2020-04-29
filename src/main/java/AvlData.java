@@ -31,17 +31,17 @@ public class AvlData {
 
     @Override
     public String toString() {
-        return  "\"timeStamp\":\"" + timeStamp + '\"' +
-                ",\"priority\":\"" + priority + '\"' +
-                ",\"location\":{" +
-                    "\"lat\":" + String.format("%.7f", latitude) +
-                    ",\"lon\":" + String.format("%.7f", longitude) +
-                "}" +
-                ",\"altitude\":" + String.format("%4d", altitude) +
-                ",\"angle\":" + String.format("%3d", angle) +
-                ",\"satellite\":" + String.format("%2d", satellite) +
-                ",\"speed\":" + String.format("%3d", speed) +
-                "," + ioElement;
+        return "data{" +
+                "time='" + timeStamp + '\'' +
+                ", prio='" + priority + '\'' +
+                // Below output (lat, long) could directly be copied/pasted to https://www.google.com/maps/
+                ", lat long=" + String.format("%.7f", latitude) + ", " + String.format("%.7f", longitude) +
+                ", alt=" + String.format("%04d", altitude) +
+                ", angle=" + String.format("%03d", angle) +
+                ", sat=" + String.format("%02d", satellite) +
+                ", speed=" + String.format("%03d", speed) +
+                ", io=" + ioElement +
+                '}';
     }
 
 //    @Override
@@ -114,19 +114,12 @@ public class AvlData {
 
     private LinkedHashMap<Integer, String> parseXbIOElement(String str, int count, int size) {
         LinkedHashMap<Integer, String> xByteElement = new LinkedHashMap<>();
-        String value;
 
         for (int i = 0; i < count; i++) {
             int key = Integer.parseInt(str.substring(0, 2), 16);
             str = str.substring(2);
 
-            if (key != 78) {    // 78 Property ID is iButton ID for Teltonika FMM130
-                value = String.valueOf(Long.parseUnsignedLong(str.substring(0, size), 16));
-            } else {
-                String hexID = str.substring(0, size);
-                value = "0000000000000000".compareTo(hexID) == 0 ? "0" : hexID.toUpperCase();
-            }
-
+            String value = String.format("%0" + size + "d", Long.parseUnsignedLong(str.substring(0, size), 16));
             str = str.substring(size);
 
             xByteElement.put(key, value);

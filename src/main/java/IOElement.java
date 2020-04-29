@@ -38,21 +38,24 @@ public class IOElement {
 
     @Override
     public String toString() {
-        return "\"eventID\":" + (Main.DEVICE_AVL_ID.containsKey(eventID) ? '"' + Main.DEVICE_AVL_ID.get(eventID) + '"' : String.format("\"%d\"", eventID)) +
-                ",\"elementCount\":" + elementCount +
-                ",\"oneByteElementCount\":" + oneByteElementCount +
-                ',' + toStringWithKeyOnThreeDigits(oneByteElement) +
-                ",\"twoByteElementCount\":" + twoByteElementCount +
-                ',' + toStringWithKeyOnThreeDigits(twoByteElement) +
-                ",\"fourByteElementCount\":" + fourByteElementCount +
-                ',' + toStringWithKeyOnThreeDigits(fourByteElement) +
-                (eightByteElementCount !=0 ? ",\"eightByteElementCount\":" + eightByteElementCount + ',' + toStringWithKeyOnThreeDigits(eightByteElement) : "");
+        return "elmnt{" +
+                "event=" + String.format("%03d", eventID) +
+                ", elmnt cnt=" + elementCount +
+                ", 1B cnt=" + oneByteElementCount +
+                ", 1B elmnt=" + toStringWithKeyOnThreeDigits(oneByteElement) +
+                ", 2B cnt=" + twoByteElementCount +
+                ", 2B elmnt=" + toStringWithKeyOnThreeDigits(twoByteElement) +
+                ", 4B cnt=" + fourByteElementCount +
+                ", 4B elmnt=" + toStringWithKeyOnThreeDigits(fourByteElement) +
+                ", 8B cnt=" + eightByteElementCount +
+                ", 8B elmnt=" + toStringWithKeyOnThreeDigits(eightByteElement) +
+                '}';
     }
 
     public String toStringWithKeyOnThreeDigits(LinkedHashMap<Integer, String> map) {
         String mapAsString = map.keySet().stream()
-                .map(key -> (Main.DEVICE_AVL_ID.containsKey(key) ? '"' + Main.DEVICE_AVL_ID.get(key) + '"' : String.format("\"%03d\"", key)) + ":" + (key == 78 ? ('"' + map.get(key) + '"') : map.get(key)))    // 78 Property ID is iButton ID for Teltonika FMM130
-                .collect(Collectors.joining(","));
+                .map(key -> String.format("%03d", key) + "=" + map.get(key))
+                .collect(Collectors.joining(", ", "{", "}"));
         return mapAsString;
     }
 
