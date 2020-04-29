@@ -15,8 +15,8 @@ public class Main {
 
     private static String DATE_TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
     private static String PROPERTY_MANUFACTURERS_DEVICES_FILE_NAME = "properties/ManufacturersDevices.properties";
-    private static String INPUT_FILE_NAME = "log/in.log";
-    private static String OUTPUT_FILE_NAME = "log/out.log";
+    private static String INPUT_FILE_NAME = "data/in.txt";
+    private static String OUTPUT_FILE_NAME = "data/out.txt";
     private static int IGNITION_CODE = 239;
     private static String NUMBER_OF_FILE_LINES_TO_TREAT = "*";    // "*" for all
     private static int N_WORST = 10;
