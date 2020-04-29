@@ -14,9 +14,9 @@ public class Main {
     public static String DEVICE;
 
     private static String DATE_TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
-    private static String PROPERTY_MANUFACTURERS_DEVICES_FILE_NAME = "ManufacturersDevices.properties";
-    private static String INPUT_FILE_NAME = "in.log";
-    private static String OUTPUT_TXT_FILE_NAME = "out.log";
+    private static String PROPERTY_MANUFACTURERS_DEVICES_FILE_NAME = "properties/ManufacturersDevices.properties";
+    private static String INPUT_FILE_NAME = "log/in.log";
+    private static String OUTPUT_FILE_NAME = "log/out.log";
     private static int IGNITION_CODE = 239;
     private static String NUMBER_OF_FILE_LINES_TO_TREAT = "*";    // "*" for all
     private static int N_WORST = 10;
@@ -107,11 +107,9 @@ public class Main {
         MANUFACTURER = deviceSelector.split("\\.")[0];
         DEVICE = deviceSelector.split("\\.")[1];
 
-        System.out.println();
-        System.out.println("Selector:\t\t" + deviceSelector);
-        System.out.println("Manufacturer:\t" + MANUFACTURER);
-        System.out.println("Device:\t\t\t" + DEVICE);
-        System.out.println();
+        System.out.print("Selector: " + deviceSelector + ", ");
+        System.out.print("Manufacturer: " + MANUFACTURER + ", ");
+        System.out.print("Device: " + DEVICE + ", ");
 
         try (InputStream input = new FileInputStream(Main.class.getClassLoader().getResource(PROPERTY_MANUFACTURERS_DEVICES_FILE_NAME).getFile())) {
             Properties prop = new Properties();
@@ -123,7 +121,6 @@ public class Main {
             manufacturerDevice = prop.getProperty(deviceSelector);
             if(manufacturerDevice != null && !manufacturerDevice.isEmpty()) {
                 System.out.println(manufacturerDevice);
-                System.out.println();
             }
         } catch (IOException ex) {
             ex.printStackTrace();
@@ -140,11 +137,11 @@ public class Main {
 
         List<AvlDataPacket> list = new ArrayList<>();
         DateTimeFormatter fmt = DateTimeFormatter.ofPattern(DATE_TIME_FORMAT);
-        File file = new File(Main.class.getClassLoader().getResource(INPUT_FILE_NAME).getFile());
+        File file = new File(INPUT_FILE_NAME);
         LineIterator it = null;
         imeiOccurence = new HashMap<>();
         long fileLineCount=0;
-        Writer fileTxtWriter = new FileWriter(OUTPUT_TXT_FILE_NAME, false); //overwrites file
+        Writer fileTxtWriter = new FileWriter(OUTPUT_FILE_NAME, false); //overwrites file
         int fileLineNumber = 0;
         int matchLine = 0;
         char[] animationChars = new char[]{'|', '/', '-', '\\'};
@@ -223,9 +220,8 @@ public class Main {
         }
 
         System.out.println("Processing: Done!");
-        System.out.println();
-        System.out.println("Total");
-        System.out.println(matchLine + " matched in " + lineToTreat);
+        System.out.print("Total: ");
+        System.out.print(matchLine + " matched in " + lineToTreat);
 
         fileTxtWriter.close();
 
