@@ -147,17 +147,17 @@ public class AvlDataPacket {
                 writer.write(
                         '{' +
 
-                            "\"line\":" + (fileLineTreated + i) +
+                            "\"line\":" + String.format("%7d", (fileLineTreated + i)) +
 
                             ",\"manufacturer\":\"" + Main.MANUFACTURER + '\"' +
                             ",\"device\":\"" + Main.DEVICE + '\"' +
 
-                            ",\"imei\":\"" + imei + "\",\"messageTotal\":" + size + ",\"messageIndex\":" + (i + 1) + ',' + avlDataList.get(i) +
+                            ",\"imei\":\"" + imei + "\",\"messageTotal\":" + String.format("%2d", size) + ",\"messageIndex\":" + String.format("%2d", (i + 1)) + ',' + avlDataList.get(i) +
 
                             ",\"length\":\"" + avlDataLength + '\"' +
                             ",\"codec\":\"" + codecID + '\"' +
-                            ",\"cntBegin\":" + Integer.parseInt(avlDataCountBegin, 16) +
-                            ",\"cntEnd\":" + Integer.parseInt(avlDataCountEnd,16) +
+                            ",\"cntBegin\":" + String.format("%2d", Integer.parseInt(avlDataCountBegin, 16)) +
+                            ",\"cntEnd\":" + String.format("%2d", Integer.parseInt(avlDataCountEnd,16)) +
                             ",\"crc\":\"" + crc + '\"' +
                             ",\"raw\":\"" + raw + "\"" +
 
