@@ -1,4 +1,7 @@
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.opencsv.CSVReader;
+import com.opencsv.bean.CsvToBean;
+import com.opencsv.bean.HeaderColumnNameTranslateMappingStrategy;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.LineIterator;
 
@@ -12,9 +15,11 @@ public class Main {
     public static LinkedHashMap<Integer, String> DEVICE_AVL_ID;
     public static String MANUFACTURER;
     public static String DEVICE;
+    public static List<TeltonikaFotaWebDeviceInfoBean> TELONIKA_FOTA_WEB_DEVICE_INFO_LIST;
 
     private static String DATE_TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
     private static String PROPERTY_MANUFACTURERS_DEVICES_FILE_NAME = "properties/ManufacturersDevices.properties";
+    private static String TELTONIKA_FOTA_WEB_DEVICE_CSV_FILE = "fota/fota_device_export.csv";
     private static String INPUT_FILE_NAME = "data/in-raw.txt";
     private static String OUTPUT_FILE_NAME = "data/out-ndjson.txt";
     private static int IGNITION_CODE = 239;
@@ -180,6 +185,37 @@ public class Main {
 //        }
 
         // ###
+
+        // ### Fota device file
+
+        try (Reader csvReader = new BufferedReader(new FileReader(Objects.requireNonNull(Main.class.getClassLoader().getResource(TELTONIKA_FOTA_WEB_DEVICE_CSV_FILE)).getFile()))) {
+
+            Map<String, String> mapping = new HashMap<String, String>();
+            mapping.put("imei", "imei");
+            mapping.put("sn", "sn");
+            mapping.put("model", "model");
+            mapping.put("firmware", "firmware");
+            mapping.put("configuration", "configuration");
+            mapping.put("description", "description");
+            mapping.put("companyname", "companyName");
+            mapping.put("group", "group");
+            mapping.put("lastlogin", "lastLogin");
+
+            HeaderColumnNameTranslateMappingStrategy<TeltonikaFotaWebDeviceInfoBean> strategy = new HeaderColumnNameTranslateMappingStrategy<TeltonikaFotaWebDeviceInfoBean>();
+            strategy.setType(TeltonikaFotaWebDeviceInfoBean.class);
+            strategy.setColumnMapping(mapping);
+
+            CsvToBean<TeltonikaFotaWebDeviceInfoBean> csvToBean = new CsvToBean<TeltonikaFotaWebDeviceInfoBean>();
+            TELONIKA_FOTA_WEB_DEVICE_INFO_LIST = csvToBean.parse(strategy, csvReader);
+
+//            // Debug
+//            for(TeltonikaFotaWebDeviceInfoBean t : TELONIKA_FOTA_WEB_DEVICE_INFO_LIST)
+//            {
+//                System.out.println(t);
+//            }
+        }
+
+        // ### Main process
 
         try (Stream<String> lines = Files.lines(file.toPath())) {
             fileLineCount = lines.count();

@@ -144,10 +144,16 @@ public class AvlDataPacket {
 //            writer.write((fileLineNumber + " / " + fileLineTreated) + ": " + header + "\r\n");
             size = avlDataList.size();
             for (int i = 0; i < size; i++) {
+                TeltonikaFotaWebDeviceInfoBean teltonikaFotaWebDeviceInfoBean = Main.TELONIKA_FOTA_WEB_DEVICE_INFO_LIST.stream()
+                        .filter(device -> imei.equals(device.getImei()))
+                        .findFirst()
+                        .orElse(null);
+
                 writer.write(
                         '{' +
 
                             "\"line\":" + String.format("%7d", (fileLineTreated + i)) +
+                            ",\"rawLine\":" + String.format("%7d", fileLineNumber) +
 
                             ",\"manufacturer\":\"" + Main.MANUFACTURER + '\"' +
                             ",\"device\":\"" + Main.DEVICE + '\"' +
@@ -159,6 +165,18 @@ public class AvlDataPacket {
                             ",\"cntBegin\":" + String.format("%2d", Integer.parseInt(avlDataCountBegin, 16)) +
                             ",\"cntEnd\":" + String.format("%2d", Integer.parseInt(avlDataCountEnd,16)) +
                             ",\"crc\":\"" + crc + '\"' +
+
+                                (teltonikaFotaWebDeviceInfoBean != null ?
+                                        (",\"sn\":\"" + (teltonikaFotaWebDeviceInfoBean.getSn() != "" ? teltonikaFotaWebDeviceInfoBean.getSn() : "na") + '\"') +
+                                        (",\"model\":\"" + (teltonikaFotaWebDeviceInfoBean.getModel() != "" ? teltonikaFotaWebDeviceInfoBean.getModel() : "na") + '\"') +
+                                        (",\"firmware\":\"" + (teltonikaFotaWebDeviceInfoBean.getFirmware() != "" ? teltonikaFotaWebDeviceInfoBean.getFirmware() : "na") + '\"') +
+                                        (",\"configuration\":\"" + (teltonikaFotaWebDeviceInfoBean.getConfiguration() != "" ? teltonikaFotaWebDeviceInfoBean.getConfiguration() : "na") + '\"') +
+                                        (",\"description\":\"" + (teltonikaFotaWebDeviceInfoBean.getDescription() != "" ? teltonikaFotaWebDeviceInfoBean.getDescription() : "na") + '\"') +
+                                        (",\"companyName\":\"" + (teltonikaFotaWebDeviceInfoBean.getCompanyName() != "" ? teltonikaFotaWebDeviceInfoBean.getCompanyName() : "na") + '\"') +
+                                        (",\"group\":\"" + (teltonikaFotaWebDeviceInfoBean.getGroup() != "" ? teltonikaFotaWebDeviceInfoBean.getGroup() : "na") + '\"') +
+                                        (",\"lastLogin\":\"" + (teltonikaFotaWebDeviceInfoBean.getLastLogin() != "" ? teltonikaFotaWebDeviceInfoBean.getLastLogin() : "na") + '\"')
+                                        : "") +
+
                             ",\"raw\":\"" + raw + "\"" +
 
                         '}' +
