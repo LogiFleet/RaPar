@@ -40,7 +40,7 @@ public class IOElement {
     @Override
     public String toString() {
         return "\"eventID\":" + (Main.DEVICE_AVL_ID.containsKey(eventID) ? '"' + String.format("%-17s", Main.DEVICE_AVL_ID.get(eventID)) + '"' : String.format("\"%-17d\"", eventID)) +
-                ",\"elementCount\":" + elementCount +
+                ",\"elementCount\":" + String.format("%2d", elementCount) +
                 ",\"oneByteElementCount\":" + String.format("%2d", oneByteElementCount) +
                 ',' + toStringWithFormatSize(oneByteElement, 3) +
                 ",\"twoByteElementCount\":" + String.format("%2d", twoByteElementCount) +
@@ -52,8 +52,33 @@ public class IOElement {
 
     public String toStringWithFormatSize(LinkedHashMap<Integer, String> map, int size) {
         String mapAsString = map.keySet().stream()
-                .map(key -> (Main.DEVICE_AVL_ID.containsKey(key) ? '"' + String.format("%-17s", Main.DEVICE_AVL_ID.get(key)) + '"' : String.format("\"%03d\"", key)) + ":" + (key == 78 ? ('"' + String.format("%" + size + "s", map.get(key)) + '"') : String.format("%" + size + "s", map.get(key))))    // 78 Property ID is iButton ID for Teltonika FMM130
+                .map(key -> {
+                    String str = "";
+
+                    if (Main.DEVICE_AVL_ID.containsKey(key)) {
+                        str += '"' + String.format("%-17s", Main.DEVICE_AVL_ID.get(key)) + '"';
+                    } else {
+                        str += String.format("\"%03d\"", key);
+                    }
+
+                    str += ':';
+
+                    if (key == 78) {    // 78 Property ID is iButton ID for Teltonika FMx device
+                        str += '"' + String.format("%" + size + "s", map.get(key)) + '"';
+                    } else {
+                        String avlIdDescriptionKey = key + "." + Main.DEVICE_AVL_ID.get(key) + "." + map.get(key);
+
+                        if (Main.DEVICE_AVL_ID_DESCRIPTION.containsKey(avlIdDescriptionKey)) {
+                            str += "\"" + String.format("%-20s", Main.DEVICE_AVL_ID_DESCRIPTION.get(avlIdDescriptionKey)) + "\"";
+                        } else {
+                            str += String.format("%" + size + "s", map.get(key));
+                        }
+                    }
+
+                    return str;
+                })
                 .collect(Collectors.joining(","));
+
         return mapAsString;
     }
 

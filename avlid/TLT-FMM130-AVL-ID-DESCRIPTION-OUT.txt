@@ -240,8 +240,6 @@
 248.Immobilizer.0:iButton_not_connected
 248.Immobilizer.1:iButton_connected_(Immobilizer)
 248.Immobilizer.2:iButton_connected_(Authorized_Driving)
-249.Jamming.0:jamming_stop
-249.Jamming.1:jamming_start
 251.Idling.0:moving
 251.Idling.1:idling
 252.Unplug.0:battery_present

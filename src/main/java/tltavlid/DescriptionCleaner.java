@@ -9,8 +9,13 @@ import java.util.regex.Pattern;
 
 public class DescriptionCleaner {
 
-    private static String TLT_DEVICE_AVL_ID_DESCRIPTION_IN_FILE_NAME = "avlid/TLT-FM3001-AVL-ID-DESCRIPTION-IN.txt";
-    private static String TLT_DEVICE_AVL_ID_DESCRIPTION_OUT_FILE_NAME = "avlid/TLT-FM3001-AVL-ID-DESCRIPTION-OUT.txt";
+    // Teltonika FM3001
+//    private static String TLT_DEVICE_AVL_ID_DESCRIPTION_IN_FILE_NAME = "avlid/TLT-FM3001-AVL-ID-DESCRIPTION-IN.txt";
+//    private static String TLT_DEVICE_AVL_ID_DESCRIPTION_OUT_FILE_NAME = "avlid/TLT-FM3001-AVL-ID-DESCRIPTION-OUT.txt";
+
+    // Teltonika FMM130
+    private static String TLT_DEVICE_AVL_ID_DESCRIPTION_IN_FILE_NAME = "avlid/TLT-FMM130-AVL-ID-DESCRIPTION-IN.txt";
+    private static String TLT_DEVICE_AVL_ID_DESCRIPTION_OUT_FILE_NAME = "avlid/TLT-FMM130-AVL-ID-DESCRIPTION-OUT.txt";
 
     public static void main(String[] args) throws IOException {
         File fileIn = new File(TLT_DEVICE_AVL_ID_DESCRIPTION_IN_FILE_NAME);
@@ -25,37 +30,31 @@ public class DescriptionCleaner {
 
         String pattern1 = "^(.*?):(.*?):(.*?)$";
         String pattern2 = "([0-9]_–_.*?(?=$|_[0-9]))";
+        String pattern3 = "([0-9])_–_(.*)"; // "1_–_Ignition_ON", g1="1", g2="Ignition_ON"
 
         // Create a Pattern object
         Pattern r1 = Pattern.compile(pattern1);
         Pattern r2 = Pattern.compile(pattern2);
+        Pattern r3 = Pattern.compile(pattern3);
 
         try {
             while (it.hasNext()) {
                 String str = it.nextLine();
                 str = str.replaceAll("-", "–"); // Clean "bad" dash
-//                String[] parts = str.split(":");
 
                 if (str.matches("^.*:(\\d_–_.*)")) {
-
                     Matcher m1 = r1.matcher(str);
-
                     if (m1.find()){
-                        System.out.print("m1g1: " + m1.group(1) + ", ");
-                        System.out.print("m1g2: " + m1.group(2) + ", ");
+                        Matcher m2 = r2.matcher(str);
+                        while (m2.find( )) {
+                            Matcher m3 = r3.matcher(m2.group(1));
+                            while (m3.find( )) {
+                                fileTxtWriter.write(m1.group(1) + "." + m1.group(2) + "." + m3.group(1)+ ":" + m3.group(2) + "\r\n");
+                            }
+                        }
                     } else {
                         System.out.print("no find for: " + str);
                     }
-
-                    Matcher m2 = r2.matcher(str);
-
-                    while (m2.find( )) {
-                        System.out.print("m2g1: " + m2.group(1) + ", ");
-                    }
-
-                    System.out.println();
-
-                    fileTxtWriter.write(str + "\r\n");
                 }
             }
         } catch (IOException e) {

@@ -14,6 +14,7 @@ import java.util.stream.Stream;
 
 public class Main {
     public static LinkedHashMap<Integer, String> DEVICE_AVL_ID;
+    public static LinkedHashMap<String, String> DEVICE_AVL_ID_DESCRIPTION;
     public static String MANUFACTURER;
     public static String DEVICE;
     public static List<TeltonikaFotaWebDeviceInfoBean> TELONIKA_FOTA_WEB_DEVICE_INFO_LIST;
@@ -96,15 +97,20 @@ public class Main {
 
     public static void main(String[] args) throws IOException {
 
-        // e.g. args[0]=tlt.fm3001, see ManufacturersDevices.properties for more
+        // e.g.:
+        // - args[0]=tlt.fmm130
+        // - args[1]=tlt.fmm130.avlid
+        // - args[2]=tlt.fmm130.avlid.description
+        // see ManufacturersDevices.properties for more
 
         String deviceSelector = null;
-        String manufacturerDevice = null;
+        String manufacturerDeviceAvlId = null;
+        String manufacturerDeviceAvlIdDescription = null;
 
         if(args.length == 0 || args[0] == null)
         {
             System.out.println();
-            System.out.println("Proper usage is args[0] as: manufacturer.device");
+            System.out.println("Proper usage is args[0] args[1] args[2] as: manufacturer.device manufacturer.device.avlid manufacturer.device.avlid.description");
             System.exit(0);
         } else {
             deviceSelector = args[0];
@@ -124,22 +130,36 @@ public class Main {
             prop.load(input);
 
             // get the property value and print it out
-            manufacturerDevice = prop.getProperty(deviceSelector);
-            if(manufacturerDevice != null && !manufacturerDevice.isEmpty()) {
-                System.out.println(manufacturerDevice);
+            manufacturerDeviceAvlId = prop.getProperty(args[1]);
+            if(manufacturerDeviceAvlId != null && !manufacturerDeviceAvlId.isEmpty()) {
+                System.out.print(manufacturerDeviceAvlId + ", ");
+            }
+
+            manufacturerDeviceAvlIdDescription = prop.getProperty(args[2]);
+            if(manufacturerDeviceAvlIdDescription != null && !manufacturerDeviceAvlIdDescription.isEmpty()) {
+                System.out.println(manufacturerDeviceAvlIdDescription);
             }
         } catch (IOException ex) {
             ex.printStackTrace();
         }
 
-        if(manufacturerDevice == null || manufacturerDevice.isEmpty())
+        if(manufacturerDeviceAvlId == null || manufacturerDeviceAvlId.isEmpty())
         {
-            System.out.println("Proper usage in ManufacturersDevices.properties file is: manufacturer.device=file name (avl-id)");
+            System.out.println("Proper usage in ManufacturersDevices.properties file is: manufacturer.device.avlid=file name (avl-id)");
             System.exit(0);
         }
 
-        File propertyIdFile = new File(manufacturerDevice);
+        if(manufacturerDeviceAvlIdDescription == null || manufacturerDeviceAvlIdDescription.isEmpty())
+        {
+            System.out.println("Proper usage in ManufacturersDevices.properties file is: manufacturer.device.avlid.description=file name (avl-id with description)");
+            System.exit(0);
+        }
+
+        File propertyIdFile = new File(manufacturerDeviceAvlId);
         DEVICE_AVL_ID = new LinkedHashMap<>();
+
+        File propertyIdFileDescription = new File(manufacturerDeviceAvlIdDescription);
+        DEVICE_AVL_ID_DESCRIPTION = new LinkedHashMap<>();
 
         List<AvlDataPacket> list = new ArrayList<>();
         DateTimeFormatter fmt = DateTimeFormatter.ofPattern(DATE_TIME_FORMAT);
@@ -172,6 +192,36 @@ public class Main {
                 String value = parts[1].trim();
 
                 DEVICE_AVL_ID.put(key, value);
+            }
+        } finally {
+            LineIterator.closeQuietly(it);
+        }
+
+        // sout DEVICE_AVL_ID
+//        for (Map.Entry<Integer, String> entry : DEVICE_AVL_ID.entrySet()) {
+//            Integer key = entry.getKey();
+//            String value = entry.getValue();
+//
+//            System.out.println(key + " -> " + value);
+//        }
+
+        // ### Device AVL ID DESCRIPTION file
+
+        try {
+            it = FileUtils.lineIterator(propertyIdFileDescription, "UTF-8");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            while (it.hasNext()) {
+                String str = it.nextLine();
+                String[] parts = str.split(":");
+
+                String key = parts[0].trim();
+                String value = parts[1].trim();
+
+                DEVICE_AVL_ID_DESCRIPTION.put(key, value);
             }
         } finally {
             LineIterator.closeQuietly(it);
