@@ -1,3 +1,4 @@
+package parser;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -54,7 +55,7 @@ public class AvlDataPacket {
 
 //    @Override
 //    public String toString() {
-//        return "AvlDataPacket{" +
+//        return "parser.AvlDataPacket{" +
 //                "imei='" + imei + '\'' +
 //                ", preamble='" + preamble + '\'' +
 //                ", avlDataLength='" + avlDataLength + '\'' +

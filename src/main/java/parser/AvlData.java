@@ -1,3 +1,4 @@
+package parser;
 
 import java.time.Instant;
 import java.time.ZoneId;
@@ -46,7 +47,7 @@ public class AvlData {
 
 //    @Override
 //    public String toString() {
-//        return "AvlData{" +
+//        return "parser.AvlData{" +
 ////                "raw='" + raw + '\'' +
 //                "timeStamp='" + timeStamp + '\'' +
 //                ", priority='" + priority + '\'' +

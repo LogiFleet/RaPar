@@ -1,3 +1,5 @@
+package parser;
+
 import com.opencsv.bean.CsvBindByName;
 
 public class TeltonikaFotaWebDeviceInfoBean {
@@ -33,7 +35,7 @@ public class TeltonikaFotaWebDeviceInfoBean {
 
     @Override
     public String toString() {
-        return "TeltonikaFotaWebDeviceInfoBean{" +
+        return "parser.TeltonikaFotaWebDeviceInfoBean{" +
                 "imei='" + imei + '\'' +
                 ", sn='" + sn + '\'' +
                 ", model='" + model + '\'' +

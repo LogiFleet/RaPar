@@ -1,5 +1,6 @@
+package parser;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.opencsv.CSVReader;
 import com.opencsv.bean.CsvToBean;
 import com.opencsv.bean.HeaderColumnNameTranslateMappingStrategy;
 import org.apache.commons.io.FileUtils;
@@ -137,7 +138,7 @@ public class Main {
             System.exit(0);
         }
 
-        File propertyIdFile = new File(Main.class.getClassLoader().getResource(manufacturerDevice).getFile());
+        File propertyIdFile = new File(manufacturerDevice);
         DEVICE_AVL_ID = new LinkedHashMap<>();
 
         List<AvlDataPacket> list = new ArrayList<>();
@@ -188,7 +189,7 @@ public class Main {
 
         // ### Fota device file
 
-        try (Reader csvReader = new BufferedReader(new FileReader(Objects.requireNonNull(Main.class.getClassLoader().getResource(TELTONIKA_FOTA_WEB_DEVICE_CSV_FILE)).getFile()))) {
+        try (Reader csvReader = new BufferedReader(new FileReader(TELTONIKA_FOTA_WEB_DEVICE_CSV_FILE))) {
 
             Map<String, String> mapping = new HashMap<String, String>();
             mapping.put("imei", "imei");
@@ -209,13 +210,13 @@ public class Main {
             TELONIKA_FOTA_WEB_DEVICE_INFO_LIST = csvToBean.parse(strategy, csvReader);
 
 //            // Debug
-//            for(TeltonikaFotaWebDeviceInfoBean t : TELONIKA_FOTA_WEB_DEVICE_INFO_LIST)
+//            for(parser.TeltonikaFotaWebDeviceInfoBean t : TELONIKA_FOTA_WEB_DEVICE_INFO_LIST)
 //            {
 //                System.out.println(t);
 //            }
         }
 
-        // ### Main process
+        // ### parser.Main process
 
         try (Stream<String> lines = Files.lines(file.toPath())) {
             fileLineCount = lines.count();
@@ -264,7 +265,7 @@ public class Main {
 //        System.out.println();
 //        System.out.println("the " + N_WORST + " worst");
 //
-//        final IntWrapper dWrapper = new IntWrapper(N_WORST);
+//        final parser.IntWrapper dWrapper = new parser.IntWrapper(N_WORST);
 //
 //        imeiOccurence.entrySet()
 //                .stream().limit(N_WORST)

@@ -1,3 +1,5 @@
+package parser;
+
 public class Converter {
 
     public static String hexToAscii(String hexStr) {
