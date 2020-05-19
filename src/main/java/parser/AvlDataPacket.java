@@ -1,5 +1,7 @@
 package parser;
 
+import util.Converter;
+
 import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
@@ -145,7 +147,7 @@ public class AvlDataPacket {
 //            writer.write((fileLineNumber + " / " + fileLineTreated) + ": " + header + "\r\n");
             size = avlDataList.size();
             for (int i = 0; i < size; i++) {
-                TeltonikaFotaWebDeviceInfoBean teltonikaFotaWebDeviceInfoBean = Main.TELONIKA_FOTA_WEB_DEVICE_INFO_LIST.stream()
+                TeltonikaFotaWebDeviceInfoBean tltBean = Main.TELONIKA_FOTA_WEB_DEVICE_INFO_LIST.stream()
                         .filter(device -> imei.equals(device.getImei()))
                         .findFirst()
                         .orElse(null);
@@ -153,29 +155,29 @@ public class AvlDataPacket {
                 writer.write(
                         '{' +
 
-                            "\"line\":" + String.format("%7d", (fileLineTreated + i)) +
-                            ",\"rawLine\":" + String.format("%7d", fileLineNumber) +
+                            "\"line\":" + (fileLineTreated + i) +
+                            ",\"rawLine\":" + fileLineNumber +
 
                             ",\"manufacturer\":\"" + Main.MANUFACTURER + '\"' +
                             ",\"device\":\"" + Main.DEVICE + '\"' +
 
-                            ",\"imei\":\"" + imei + "\",\"messageTotal\":" + String.format("%2d", size) + ",\"messageIndex\":" + String.format("%2d", (i + 1)) + ',' + avlDataList.get(i) +
+                            ",\"imei\":\"" + imei + "\",\"messageTotal\":" + size + ",\"messageIndex\":" + (i + 1) + ',' + avlDataList.get(i) +
 
                             ",\"length\":\"" + avlDataLength + '\"' +
                             ",\"codec\":\"" + codecID + '\"' +
-                            ",\"cntBegin\":" + String.format("%2d", Integer.parseInt(avlDataCountBegin, 16)) +
-                            ",\"cntEnd\":" + String.format("%2d", Integer.parseInt(avlDataCountEnd,16)) +
+                            ",\"cntBegin\":" + Integer.parseInt(avlDataCountBegin, 16) +
+                            ",\"cntEnd\":" + Integer.parseInt(avlDataCountEnd,16) +
                             ",\"crc\":\"" + crc + '\"' +
 
-                                (teltonikaFotaWebDeviceInfoBean != null ?
-                                        (",\"sn\":\"" + (teltonikaFotaWebDeviceInfoBean.getSn() != "" ? teltonikaFotaWebDeviceInfoBean.getSn() : "na") + '\"') +
-                                        (",\"model\":\"" + (teltonikaFotaWebDeviceInfoBean.getModel() != "" ? teltonikaFotaWebDeviceInfoBean.getModel() : "na") + '\"') +
-                                        (",\"firmware\":\"" + (teltonikaFotaWebDeviceInfoBean.getFirmware() != "" ? teltonikaFotaWebDeviceInfoBean.getFirmware() : "na") + '\"') +
-                                        (",\"configuration\":\"" + (teltonikaFotaWebDeviceInfoBean.getConfiguration() != "" ? teltonikaFotaWebDeviceInfoBean.getConfiguration() : "na") + '\"') +
-                                        (",\"description\":\"" + (teltonikaFotaWebDeviceInfoBean.getDescription() != "" ? teltonikaFotaWebDeviceInfoBean.getDescription() : "na") + '\"') +
-                                        (",\"companyName\":\"" + (teltonikaFotaWebDeviceInfoBean.getCompanyName() != "" ? teltonikaFotaWebDeviceInfoBean.getCompanyName() : "na") + '\"') +
-                                        (",\"group\":\"" + (teltonikaFotaWebDeviceInfoBean.getGroup() != "" ? teltonikaFotaWebDeviceInfoBean.getGroup() : "na") + '\"') +
-                                        (",\"lastLogin\":\"" + (teltonikaFotaWebDeviceInfoBean.getLastLogin() != "" ? teltonikaFotaWebDeviceInfoBean.getLastLogin() : "na") + '\"')
+                                (tltBean != null ?
+                                        (",\"sn\":\"" + (tltBean.getSn() != "" ? tltBean.getSn() : "na") + '\"') +
+                                        (",\"model\":\"" + (tltBean.getModel() != "" ? tltBean.getModel() : "na") + '\"') +
+                                        (",\"firmware\":\"" + (tltBean.getFirmware() != "" ? tltBean.getFirmware() : "na") + '\"') +
+                                        (",\"configuration\":\"" + (tltBean.getConfiguration() != "" ? tltBean.getConfiguration() : "na") + '\"') +
+                                        (",\"description\":\"" + (tltBean.getDescription() != "" ? tltBean.getDescription() : "na") + '\"') +
+                                        (",\"companyName\":\"" + (tltBean.getCompanyName() != "" ? tltBean.getCompanyName() : "na") + '\"') +
+                                        (",\"group\":\"" + (tltBean.getGroup() != "" ? tltBean.getGroup() : "na") + '\"') +
+                                        (",\"lastLogin\":\"" + (tltBean.getLastLogin() != "" ? tltBean.getLastLogin() : "na") + '\"')
                                         : "") +
 
                             ",\"raw\":\"" + raw + "\"" +

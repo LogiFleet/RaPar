@@ -38,10 +38,10 @@ public class AvlData {
                     "\"lat\":" + String.format("%.7f", latitude) +
                     ",\"lon\":" + String.format("%.7f", longitude) +
                 "}" +
-                ",\"altitude\":" + String.format("%4d", altitude) +
-                ",\"angle\":" + String.format("%3d", angle) +
-                ",\"satellite\":" + String.format("%2d", satellite) +
-                ",\"speed\":" + String.format("%3d", speed) +
+                ",\"altitude\":" + altitude +
+                ",\"angle\":" + angle +
+                ",\"satellite\":" + satellite +
+                ",\"speed\":" + speed +
                 "," + ioElement;
     }
 
