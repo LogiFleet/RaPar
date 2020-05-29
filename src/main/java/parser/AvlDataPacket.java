@@ -180,7 +180,7 @@ public class AvlDataPacket {
                                         (",\"lastLogin\":\"" + (tltBean.getLastLogin() != "" ? tltBean.getLastLogin() : "na") + '\"')
                                         : "") +
 
-                            ",\"raw\":\"" + raw + "\"" +
+//                            ",\"raw\":\"" + raw + "\"" +
 
                         '}' +
 
