@@ -48,7 +48,7 @@ public class IOElement {
                 ",\"elementCount\":" + elementCount +
                 ",\"1bElementCount\":" + oneByteElementCount + ',' + toStringWithFormatSize(oneByteElement) +
                 ",\"2bElementCount\":" + twoByteElementCount + ',' + toStringWithFormatSize(twoByteElement) +
-                ",\"4bElementCount\":" + fourByteElementCount + ',' + toStringWithFormatSize(fourByteElement) +
+                (fourByteElementCount !=0 ? ",\"4bElementCount\":" + fourByteElementCount + ',' + toStringWithFormatSize(fourByteElement) : "") +
                 (eightByteElementCount !=0 ? ",\"8bElementCount\":" + eightByteElementCount + ',' + toStringWithFormatSize(eightByteElement) : "");
     }
 
