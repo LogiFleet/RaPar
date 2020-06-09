@@ -9,13 +9,21 @@ import java.util.regex.Pattern;
 
 public class DescriptionCleaner {
 
-    // Teltonika FM3001
+//    // Teltonika FM3001
 //    private static String TLT_DEVICE_AVL_ID_DESCRIPTION_IN_FILE_NAME = "avlid/TLT-FM3001-AVL-ID-DESCRIPTION-IN.txt";
 //    private static String TLT_DEVICE_AVL_ID_DESCRIPTION_OUT_FILE_NAME = "avlid/TLT-FM3001-AVL-ID-DESCRIPTION-OUT.txt";
 
-    // Teltonika FMM130
-    private static String TLT_DEVICE_AVL_ID_DESCRIPTION_IN_FILE_NAME = "avlid/TLT-FMM130-AVL-ID-DESCRIPTION-IN.txt";
-    private static String TLT_DEVICE_AVL_ID_DESCRIPTION_OUT_FILE_NAME = "avlid/TLT-FMM130-AVL-ID-DESCRIPTION-OUT.txt";
+    // Teltonika FM36M1 !WARNING! 69:GNSS_Status:"States..." should be added by hand to ...DESCRIPTION-OUT.txt file
+    private static String TLT_DEVICE_AVL_ID_DESCRIPTION_IN_FILE_NAME = "avlid/TLT-FM36M1-AVL-ID-DESCRIPTION-IN.txt";
+    private static String TLT_DEVICE_AVL_ID_DESCRIPTION_OUT_FILE_NAME = "avlid/TLT-FM36M1-AVL-ID-DESCRIPTION-OUT.txt";
+
+//    // Teltonika FMM130
+//    private static String TLT_DEVICE_AVL_ID_DESCRIPTION_IN_FILE_NAME = "avlid/TLT-FMM130-AVL-ID-DESCRIPTION-IN.txt";
+//    private static String TLT_DEVICE_AVL_ID_DESCRIPTION_OUT_FILE_NAME = "avlid/TLT-FMM130-AVL-ID-DESCRIPTION-OUT.txt";
+
+//    // Teltonika FMC130
+//    private static String TLT_DEVICE_AVL_ID_DESCRIPTION_IN_FILE_NAME = "avlid/TLT-FMC130-AVL-ID-DESCRIPTION-IN.txt";
+//    private static String TLT_DEVICE_AVL_ID_DESCRIPTION_OUT_FILE_NAME = "avlid/TLT-FMC130-AVL-ID-DESCRIPTION-OUT.txt";
 
     public static void main(String[] args) throws IOException {
         File fileIn = new File(TLT_DEVICE_AVL_ID_DESCRIPTION_IN_FILE_NAME);

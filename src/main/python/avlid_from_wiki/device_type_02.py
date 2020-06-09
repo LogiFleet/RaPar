@@ -44,6 +44,7 @@ df_list = pd.read_html(html)
 # df = df.astype(convert_dict)
 #
 # print(df.info())
+# print(df)
 #
 # df[['c1', 'c2']].to_csv(file_name_1, mode='a', sep=':', index=False, header=False, encoding='utf-8')
 #
@@ -56,7 +57,13 @@ df = df_list[0]
 df = df.dropna()
 df.columns = ['c0', 'c1', 'c2', 'c3', 'c4', 'c5', 'c6', 'c7', 'c8', 'c9', 'c10', 'c11']
 df = df.astype(convert_dict)
-df[['c1', 'c2']].to_csv(file_name_1, mode='a', sep=':', index=False, header=False, encoding='utf-8')
+
+# Without description
+# df[['c1', 'c2']].to_csv(file_name_1, mode='a', sep=':', index=False, header=False, encoding='utf-8')
+
+# With description
+df[['c1', 'c2', 'c9']].to_csv(file_name_1, mode='a', sep=':', index=False, header=False, encoding='utf-8')
+
 # END specific to FM36M1
 
 # todo Factorize common part below
@@ -74,6 +81,12 @@ outfile.close()
 with fileinput.FileInput(file_name_2, inplace=True) as file:
     for line in file:
         print(line.replace(' ', '_'), end='')
+    file.close()
+
+# replace comma by nothing
+with fileinput.FileInput(file_name_2, inplace=True) as file:
+    for line in file:
+        print(line.replace(',', ''), end='')
     file.close()
 
 # sort
