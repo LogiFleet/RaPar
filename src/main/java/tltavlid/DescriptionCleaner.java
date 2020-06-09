@@ -14,6 +14,7 @@ public class DescriptionCleaner {
 //    private static String TLT_DEVICE_AVL_ID_DESCRIPTION_OUT_FILE_NAME = "avlid/TLT-FM3001-AVL-ID-DESCRIPTION-OUT.txt";
 
     // Teltonika FM36M1 !WARNING! 69:GNSS_Status:"States..." should be added by hand to ...DESCRIPTION-OUT.txt file
+    // and Network_type field separator at each ending lines (; .) should be removed
     private static String TLT_DEVICE_AVL_ID_DESCRIPTION_IN_FILE_NAME = "avlid/TLT-FM36M1-AVL-ID-DESCRIPTION-IN.txt";
     private static String TLT_DEVICE_AVL_ID_DESCRIPTION_OUT_FILE_NAME = "avlid/TLT-FM36M1-AVL-ID-DESCRIPTION-OUT.txt";
 

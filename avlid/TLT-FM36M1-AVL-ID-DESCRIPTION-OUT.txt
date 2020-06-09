@@ -4,10 +4,10 @@
 69:GNSS_Status.3:Working_GPS_FIX_acquired
 69:GNSS_Status.4:GPS_sleep
 69:GNSS_Status.5:GPS_antenna_is_short_circuited
-79.Network_type.0:2G;
-79.Network_type.2:3G;
-79.Network_type.8:LTE–M1;
-79.Network_type.9:NB–IOT.
+79.Network_type.0:2G
+79.Network_type.2:3G
+79.Network_type.8:LTE–M1
+79.Network_type.9:NB–IOT
 80.Working_Mode.0:home_on_stop
 80.Working_Mode.1:home_on_move
 80.Working_Mode.2:roaming_on_stop
