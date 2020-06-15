@@ -12,6 +12,7 @@ public class AvlDataPacket {
     private String raw;
 
     private String imei;
+    private String timeStamp;
     private String preamble;
     private String avlDataLength;
     private String codecID;
@@ -34,11 +35,19 @@ public class AvlDataPacket {
         this.avlDataAggregatedPlusBalance = avlDataAggregated;
 
         this.avlDataList = new ArrayList<>();
+    }
 
+    public AvlDataPacket(String raw, String imei, String timeStamp, String preamble, String avlDataLength, String codecID, String avlDataCount, String avlDataAggregated) {
+        this(raw, imei, preamble, avlDataLength, codecID, avlDataCount, avlDataAggregated);
+
+        this.timeStamp = timeStamp;
+    }
+
+    public void process() {
         //TODO Separate data and process -> service
         if (codecID.compareTo("08") == 0) splitAvlDataAggregated(); // Process only data frame Codec 08 encoded
-        // TODO !NOT CLEAN! improve with Codec 0c (12) GPRS command decoding (device acknowledge)
-        else if (codecID.compareTo("0c") == 0) this.raw = Converter.hexToAscii(avlDataAggregated);    // Convert Codec 0c (12) GPRS command (device acknowledge) into ASCII String
+            // TODO !NOT CLEAN! improve with Codec 0c (12) GPRS command decoding (device acknowledge)
+        else if (codecID.compareTo("0c") == 0) this.raw = Converter.hexToAscii(avlDataAggregatedPlusBalance);    // Convert Codec 0c (12) GPRS command (device acknowledge) into ASCII String
     }
 
     @Override
@@ -119,7 +128,7 @@ public class AvlDataPacket {
                 elementCountRetain = elementCount;
             }
 
-            avlDataList.add(new AvlData(rawAvlData));
+            avlDataList.add(new AvlData(this, rawAvlData));
         }
 
         avlDataCountEnd = str.substring(0, 2);
@@ -200,6 +209,10 @@ public class AvlDataPacket {
 
     public String getImei() {
         return imei;
+    }
+
+    public String getTimeStamp() {
+        return timeStamp;
     }
 
     public String getPreamble() {

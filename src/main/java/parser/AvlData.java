@@ -5,11 +5,16 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.LinkedHashMap;
 
+import static parser.Main.FLAG_TIME_STAMP;
+
 public class AvlData {
+
+    private AvlDataPacket avlDataPacket;
 
     private String raw;
 
     private String timeStamp;
+    private String gatewayDate;
     private String priority;
     private float longitude;
     private float latitude;
@@ -23,7 +28,8 @@ public class AvlData {
 
     private DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
-    public AvlData(String raw) {
+    public AvlData(AvlDataPacket avlDataPacket, String raw) {
+        this.avlDataPacket = avlDataPacket;
         this.raw = raw;
 
         //TODO Separate data and process -> service
@@ -32,7 +38,8 @@ public class AvlData {
 
     @Override
     public String toString() {
-        return  "\"timeStamp\":\"" + timeStamp + '\"' +
+        return  (FLAG_TIME_STAMP ? ("\"gatewayDate\":\"" + gatewayDate + "\",") : ("")) +
+                "\"timeStamp\":\"" + timeStamp + '\"' +
                 ",\"priority\":\"" + priority + '\"' +
                 ",\"location\":{" +
                     "\"lat\":" + String.format("%.7f", latitude) +
@@ -63,9 +70,18 @@ public class AvlData {
 //    }
 
     private void parse(){
-        Instant instant = Instant.ofEpochMilli(Long.parseLong(raw.substring(0,16), 16));
+        Instant instant;
+
+        if (FLAG_TIME_STAMP) {
+            instant = Instant.parse(avlDataPacket.getTimeStamp());
+            gatewayDate = fmt.format(instant.atZone(ZoneId.systemDefault()));
+        }
+
+        instant = Instant.ofEpochMilli(Long.parseLong(raw.substring(0,16), 16));
         timeStamp = fmt.format(instant.atZone(ZoneId.systemDefault()));
+
         priority = raw.substring(16, 18);
+
         longitude = (float)(Integer.parseInt(raw.substring(18, 26), 16)) / 10000000;
         latitude = (float)(Integer.parseInt(raw.substring(26, 34), 16)) / 10000000;
 

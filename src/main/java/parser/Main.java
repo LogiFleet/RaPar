@@ -18,6 +18,7 @@ public class Main {
     public static String MANUFACTURER;
     public static String DEVICE;
     public static List<TeltonikaFotaWebDeviceInfoBean> TELONIKA_FOTA_WEB_DEVICE_INFO_LIST;
+    public static Boolean FLAG_TIME_STAMP = false;
 
     private static String DATE_TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
     private static String PROPERTY_MANUFACTURERS_DEVICES_FILE_NAME = "properties/ManufacturersDevices.properties";
@@ -28,6 +29,7 @@ public class Main {
     private static String NUMBER_OF_FILE_LINES_TO_TREAT = "*";    // "*" for all
     private static int N_WORST = 10;
     private static HashMap<String, Integer> imeiOccurence;
+    private static String ARG_FLAG_TIME_STAMP = "-ts";
 
     private static int treatmentSwitch(AvlDataPacket avlDataPacket, Writer writer, int fileLineNumber, int matchLine) {
 
@@ -175,6 +177,20 @@ public class Main {
         long lineToTreat = 0;
         ObjectMapper mapper = new ObjectMapper();
 
+        // ### Argument flags: BEGIN
+
+        for(String arg: args) {
+
+            // -ts for timestamp in raw data log for server gateway date
+            // log without timestamp = imei;raw e.g. 864394040101331;000000000000008408010000...
+            // log with timestamp = imei;timestamp;raw e.g. 864394040101331;2020-06-15T05:12:45.303Z;000000000000008408010000...
+            if (arg.compareTo(ARG_FLAG_TIME_STAMP) == 0) {
+                FLAG_TIME_STAMP = true;
+            }
+        }
+
+        // ### Argument flags: END
+
         // ### Device AVL ID file
 
         try {
@@ -288,13 +304,28 @@ public class Main {
         try {
             while (it.hasNext() && fileLineNumber < lineToTreat) {
                 String str = it.nextLine();
-                AvlDataPacket avlDataPacket = new AvlDataPacket(str,
-                    str.substring(0, 15),
-                    str.substring(16, 24),
-                    str.substring(24, 32),
-                    str.substring(32, 34),
-                    str.substring(34, 36),
-                    str.substring(36));
+                AvlDataPacket avlDataPacket;
+
+                if (FLAG_TIME_STAMP) {
+                    avlDataPacket = new AvlDataPacket(str,
+                            str.substring(0, 15),
+                            str.substring(16, 40),
+                            str.substring(41, 49),
+                            str.substring(49, 57),
+                            str.substring(57, 59),
+                            str.substring(59, 61),
+                            str.substring(61));
+                } else {
+                    avlDataPacket = new AvlDataPacket(str,
+                            str.substring(0, 15),
+                            str.substring(16, 24),
+                            str.substring(24, 32),
+                            str.substring(32, 34),
+                            str.substring(34, 36),
+                            str.substring(36));
+                }
+
+                avlDataPacket.process();
 
                 fileLineNumber++;
                 matchLine = treatmentSwitch(avlDataPacket, fileTxtWriter, fileLineNumber, matchLine);
