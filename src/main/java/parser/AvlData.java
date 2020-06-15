@@ -6,6 +6,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.LinkedHashMap;
 
 import static parser.Main.FLAG_TIME_STAMP;
+import static util.Converter.StringToByteArray;
 
 public class AvlData {
 
@@ -137,16 +138,37 @@ public class AvlData {
             int key = Integer.parseInt(str.substring(0, 2), 16);
             str = str.substring(2);
 
-            if (key != 78) {    // 78 Property ID is iButton ID for Teltonika FMM130
-                value = String.valueOf(Long.parseUnsignedLong(str.substring(0, size), 16));
-            } else {
+            int sKey1 = 0;
+            String sValue1 = "";
+
+            // Common for Teltonika FM3001, FM36M1, FMM130, FMC130
+            // Some property values stay in Hex format
+            if (key == 78 || key == 101 || key == 132) {  // 8 bytes: 78 = iButton, 101 = Module_ID, 132 = Security_State_Flags
                 String hexID = str.substring(0, size);
                 value = "0000000000000000".compareTo(hexID) == 0 ? "0" : hexID.toUpperCase();
+
+                if (key == 132 && value.compareTo("0") != 0) {   // 132 = Security_State_Flags
+                    byte[] bytes = StringToByteArray(value.toCharArray());
+
+                    int engineIsWorking = (bytes[3] & 0x40) == 0 ? 0 : 1;
+
+                    sKey1 = 13227;  // 132-27:Engine_is_working -> 132 for Security_State_Flags * 100 and 27 because it's the 27th flags in it -> SRC: https://wiki.teltonika-gps.com/view/FMB120_CAN_adapters#CAN_Adapter_State_Flags
+                    sValue1 = String.valueOf(engineIsWorking);
+                }
+            } else if (key == 123) {    // 4 bytes: 123 = Control_State_Flags
+                String hexID = str.substring(0, size);
+                value = "00000000".compareTo(hexID) == 0 ? "0" : hexID.toUpperCase();
+            } else {
+                value = String.valueOf(Long.parseUnsignedLong(str.substring(0, size), 16));
             }
 
             str = str.substring(size);
 
             xByteElement.put(key, value);
+
+            if (sKey1 != 0) {
+                xByteElement.put(sKey1, sValue1);
+            }
         }
 
         return xByteElement;
