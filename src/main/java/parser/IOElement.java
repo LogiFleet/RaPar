@@ -49,7 +49,7 @@ public class IOElement {
                 ",\"1bElementCount\":" + oneByteElementCount + ',' + toStringWithFormatSize(oneByteElement) +
                 ",\"2bElementCount\":" + twoByteElementCount + ',' + toStringWithFormatSize(twoByteElement) +
                 (fourByteElementCount !=0 ? ",\"4bElementCount\":" + fourByteElementCount + ',' + toStringWithFormatSize(fourByteElement) : "") +
-                (eightByteElementCount !=0 ? ",\"8bElementCount\":" + eightByteElementCount + ',' + toStringWithFormatSize(eightByteElement) : "");
+                (eightByteElementCount !=0 ? ",\"8bElementCount-+\":" + eightByteElementCount + ',' + toStringWithFormatSize(eightByteElement) : "");   // -+ means count without additional parsed values from Flags (Control, Security, ...)
     }
 
     public String toStringWithFormatSize(LinkedHashMap<Integer, String> map) {

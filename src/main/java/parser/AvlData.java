@@ -1,5 +1,7 @@
 package parser;
 
+import org.apache.commons.lang3.ArrayUtils;
+
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -9,6 +11,21 @@ import static parser.Main.FLAG_TIME_STAMP;
 import static util.Converter.StringToByteArray;
 
 public class AvlData {
+
+    // Common for Teltonika FM3001, FM36M1, FMM130, FMC130
+    private static int I_BUTTON_PROPERTY_ID = 78;
+    private static int MODULE_ID_PROPERTY_ID = 101;
+    private static int SECURITY_STATE_FLAGS_PROPERTY_ID = 132;
+    private static int CONTROL_STATE_FLAGS_PROPERTY_ID = 123;
+
+    // Other static values
+    private static String ZERO_8BYTES = "0000000000000000";
+    private static String ZERO_4BYTES = "00000000";
+    private static String ZERO_STRING = "0";
+
+    private static int CABU_SSF_B4B6_ENGINE_WORKING_AVL_ID = 132038;    // 1320-38:Engine_is_working -> 132 for Security_State_Flags * 1000 (margin), 38 for 38th bit -> SRC: https://wiki.teltonika-gps.com/view/FMB120_CAN_adapters#CAN_Adapter_State_Flags
+    private static byte CABU_SSF_B4B6_ENGINE_WORKING_VALUE_BITMASK = 0x40;
+    private static int CABU_SSF_B4B6_ENGINE_WORKING_BYTE_POS = 4;
 
     private AvlDataPacket avlDataPacket;
 
@@ -138,26 +155,28 @@ public class AvlData {
             int key = Integer.parseInt(str.substring(0, 2), 16);
             str = str.substring(2);
 
-            int sKey1 = 0;
-            String sValue1 = "";
+            int engineIsWorkingSubKey = 0;
+            String engineIsWorkingSubValue = "";
 
-            // Common for Teltonika FM3001, FM36M1, FMM130, FMC130
-            // Some property values stay in Hex format
-            if (key == 78 || key == 101 || key == 132) {  // 8 bytes: 78 = iButton, 101 = Module_ID, 132 = Security_State_Flags
+            // Some PROPERTY_ID values stay in Hex format (no sense to convert them in Dec format)
+            if (key == I_BUTTON_PROPERTY_ID || key == MODULE_ID_PROPERTY_ID || key == SECURITY_STATE_FLAGS_PROPERTY_ID) {  // 8 bytes
                 String hexID = str.substring(0, size);
-                value = "0000000000000000".compareTo(hexID) == 0 ? "0" : hexID.toUpperCase();
+                value = ZERO_8BYTES.compareTo(hexID) == 0 ? ZERO_STRING : hexID.toUpperCase();
 
-                if (key == 132 && value.compareTo("0") != 0) {   // 132 = Security_State_Flags
-                    byte[] bytes = StringToByteArray(value.toCharArray());
+                // Additional parsing of "Engine is working" value
+                if (key == SECURITY_STATE_FLAGS_PROPERTY_ID && value.compareTo(ZERO_STRING) != 0) {
+                    byte[] securityStateFlags = StringToByteArray(value.toCharArray());
 
-                    int engineIsWorking = (bytes[3] & 0x40) == 0 ? 0 : 1;
+                    ArrayUtils.reverse(securityStateFlags); // Reverse to be aligned with byte ref number from Teltonika documentation, when converted from Hex [..., B4, B3, B2, ...] but to be aligned with byte array indices -> reverse, then -> [B0, B1, B2, B3, B4, ...]
 
-                    sKey1 = 13227;  // 132-27:Engine_is_working -> 132 for Security_State_Flags * 100 and 27 because it's the 27th flags in it -> SRC: https://wiki.teltonika-gps.com/view/FMB120_CAN_adapters#CAN_Adapter_State_Flags
-                    sValue1 = String.valueOf(engineIsWorking);
+                    int engineIsWorking = (securityStateFlags[CABU_SSF_B4B6_ENGINE_WORKING_BYTE_POS] & CABU_SSF_B4B6_ENGINE_WORKING_VALUE_BITMASK) == 0 ? 0 : 1;
+
+                    engineIsWorkingSubKey = CABU_SSF_B4B6_ENGINE_WORKING_AVL_ID;
+                    engineIsWorkingSubValue = String.valueOf(engineIsWorking);
                 }
-            } else if (key == 123) {    // 4 bytes: 123 = Control_State_Flags
+            } else if (key == CONTROL_STATE_FLAGS_PROPERTY_ID) {    // 4 bytes
                 String hexID = str.substring(0, size);
-                value = "00000000".compareTo(hexID) == 0 ? "0" : hexID.toUpperCase();
+                value = ZERO_4BYTES.compareTo(hexID) == 0 ? ZERO_STRING : hexID.toUpperCase();
             } else {
                 value = String.valueOf(Long.parseUnsignedLong(str.substring(0, size), 16));
             }
@@ -166,8 +185,8 @@ public class AvlData {
 
             xByteElement.put(key, value);
 
-            if (sKey1 != 0) {
-                xByteElement.put(sKey1, sValue1);
+            if (engineIsWorkingSubKey != 0) {
+                xByteElement.put(engineIsWorkingSubKey, engineIsWorkingSubValue);
             }
         }
 

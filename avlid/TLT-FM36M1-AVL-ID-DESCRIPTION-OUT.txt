@@ -43,3 +43,5 @@
 253.Green_driving_type.1:harsh_acceleration
 253.Green_driving_type.2:harsh_braking
 253.Green_driving_type.3:harsh_cornering
+132038.CaBu_SSF_B4B6_Engine_Working+.0:Engine_OFF
+132038.CaBu_SSF_B4B6_Engine_Working+.1:Engine_ON

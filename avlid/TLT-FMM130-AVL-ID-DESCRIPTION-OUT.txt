@@ -255,3 +255,5 @@
 283.Driving_State.1:Ignition_ON
 283.Driving_State.2:Driving
 283.Driving_State.3:Ignition_OFF
+132038.CaBu_SSF_B4B6_Engine_Working+.0:Engine_OFF
+132038.CaBu_SSF_B4B6_Engine_Working+.1:Engine_ON
