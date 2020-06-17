@@ -13,23 +13,23 @@ import static util.Converter.StringToByteArray;
 public class AvlData {
 
     // Common for Teltonika FM3001, FM36M1, FMM130, FMC130
-    private static int I_BUTTON_PROPERTY_ID = 78;
-    private static int MODULE_ID_PROPERTY_ID = 101;
-    private static int SECURITY_STATE_FLAGS_PROPERTY_ID = 132;
-    private static int CONTROL_STATE_FLAGS_PROPERTY_ID = 123;
+    private static final int I_BUTTON_PROPERTY_ID = 78;
+    private static final int MODULE_ID_PROPERTY_ID = 101;
+    private static final int SECURITY_STATE_FLAGS_PROPERTY_ID = 132;
+    private static final int CONTROL_STATE_FLAGS_PROPERTY_ID = 123;
 
     // Other static values
-    private static String ZERO_8BYTES = "0000000000000000";
-    private static String ZERO_4BYTES = "00000000";
-    private static String ZERO_STRING = "0";
+    private static final String ZERO_8BYTES = "0000000000000000";
+    private static final String ZERO_4BYTES = "00000000";
+    private static final String ZERO_STRING = "0";
 
-    private static int CABU_SSF_B4B6_ENGINE_WORKING_AVL_ID = 132038;    // 1320-38:Engine_is_working -> 132 for Security_State_Flags * 1000 (margin), 38 for 38th bit -> SRC: https://wiki.teltonika-gps.com/view/FMB120_CAN_adapters#CAN_Adapter_State_Flags
-    private static byte CABU_SSF_B4B6_ENGINE_WORKING_VALUE_BITMASK = 0x40;
-    private static int CABU_SSF_B4B6_ENGINE_WORKING_BYTE_POS = 4;
+    private static final int CABU_SSF_B4B6_ENGINE_WORKING_AVL_ID = 132038;    // 1320-38:Engine_is_working -> 132 for Security_State_Flags * 1000 (margin), 38 for 38th bit -> SRC: https://wiki.teltonika-gps.com/view/FMB120_CAN_adapters#CAN_Adapter_State_Flags
+    private static final byte CABU_SSF_B4B6_ENGINE_WORKING_VALUE_BITMASK = 0x40;
+    private static final int CABU_SSF_B4B6_ENGINE_WORKING_BYTE_POS = 4;
 
-    private AvlDataPacket avlDataPacket;
+    private final AvlDataPacket avlDataPacket;
 
-    private String raw;
+    private final String raw;
 
     private String timeStamp;
     private String gatewayDate;
@@ -41,10 +41,9 @@ public class AvlData {
     private Byte satellite;
     private Short speed;
 
-    private String ioElementRaw;
     private IOElement ioElement;
 
-    private DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    private final DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     public AvlData(AvlDataPacket avlDataPacket, String raw) {
         this.avlDataPacket = avlDataPacket;
@@ -69,23 +68,6 @@ public class AvlData {
                 ",\"speed\":" + speed +
                 "," + ioElement;
     }
-
-//    @Override
-//    public String toString() {
-//        return "parser.AvlData{" +
-////                "raw='" + raw + '\'' +
-//                "timeStamp='" + timeStamp + '\'' +
-//                ", priority='" + priority + '\'' +
-//                // Below output (lat, long) could directly be copied/pasted to https://www.google.com/maps/
-//                ", latitude longitude=" + String.format("%.7f", latitude) + ", " + String.format("%.7f", longitude) +
-//                ", altitude=" + String.format("%04d", altitude) +
-//                ", angle=" + String.format("%03d", angle) +
-//                ", satellite=" + String.format("%02d", satellite) +
-//                ", speed=" + String.format("%03d", speed) +
-////                ", ioElementRaw='" + ioElementRaw + '\'' +
-//                ", ioElement=" + ioElement +
-//                '}';
-//    }
 
     private void parse(){
         Instant instant;
@@ -113,7 +95,6 @@ public class AvlData {
         angle = Short.parseShort(raw.substring(38, 42), 16);
         satellite = Byte.parseByte(raw.substring(42, 44), 16);
         speed = Short.parseShort(raw.substring(44, 48), 16);
-        ioElementRaw = raw.substring(48);
 
         int eventID = Integer.parseInt(raw.substring(48, 50), 16);
         int elementCount = Integer.parseInt(raw.substring(50, 52), 16);
@@ -197,40 +178,16 @@ public class AvlData {
         return raw;
     }
 
-    public String getTimeStamp() {
-        return timeStamp;
-    }
-
     public String getPriority() {
         return priority;
-    }
-
-    public float getLongitude() {
-        return longitude;
-    }
-
-    public float getLatitude() {
-        return latitude;
-    }
-
-    public Short getAltitude() {
-        return altitude;
     }
 
     public Short getAngle() {
         return angle;
     }
 
-    public Byte getSatellite() {
-        return satellite;
-    }
-
     public Short getSpeed() {
         return speed;
-    }
-
-    public String getIoElementRaw() {
-        return ioElementRaw;
     }
 
     public IOElement getIoElement() {
