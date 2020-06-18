@@ -27,6 +27,10 @@ public class AvlData {
     private static final byte CABU_SSF_B4B6_ENGINE_WORKING_VALUE_BITMASK = 0x40;
     private static final int CABU_SSF_B4B6_ENGINE_WORKING_BYTE_POS = 4;
 
+    private static final int CABU_SSF_B6B7_CAN_MODULE_GOES_TO_SLEEP_MODE_AVL_ID = 132055;    // 1320-55:CAN_Module_Goes_To_Sleep_Mode
+    private static final short CABU_SSF_B6B7_CAN_MODULE_GOES_TO_SLEEP_MODE_VALUE_BITMASK = 0x80;
+    private static final int CABU_SSF_B6B7_CAN_MODULE_GOES_TO_SLEEP_MODE_BYTE_POS = 6;
+
     private final AvlDataPacket avlDataPacket;
 
     private final String raw;
@@ -138,6 +142,8 @@ public class AvlData {
 
             int engineIsWorkingSubKey = 0;
             String engineIsWorkingSubValue = "";
+            int canModuleGoesToSleepModeSubKey = 0;
+            String canModuleGoesToSleepModeSubValue = "";
 
             // Some PROPERTY_ID values stay in Hex format (no sense to convert them in Dec format)
             if (key == I_BUTTON_PROPERTY_ID || key == MODULE_ID_PROPERTY_ID || key == SECURITY_STATE_FLAGS_PROPERTY_ID) {  // 8 bytes
@@ -151,9 +157,12 @@ public class AvlData {
                     ArrayUtils.reverse(securityStateFlags); // Reverse to be aligned with byte ref number from Teltonika documentation, when converted from Hex [..., B4, B3, B2, ...] but to be aligned with byte array indices -> reverse, then -> [B0, B1, B2, B3, B4, ...]
 
                     int engineIsWorking = (securityStateFlags[CABU_SSF_B4B6_ENGINE_WORKING_BYTE_POS] & CABU_SSF_B4B6_ENGINE_WORKING_VALUE_BITMASK) == 0 ? 0 : 1;
-
                     engineIsWorkingSubKey = CABU_SSF_B4B6_ENGINE_WORKING_AVL_ID;
                     engineIsWorkingSubValue = String.valueOf(engineIsWorking);
+
+                    int canModuleGoesToSleepMode = (securityStateFlags[CABU_SSF_B6B7_CAN_MODULE_GOES_TO_SLEEP_MODE_BYTE_POS] & CABU_SSF_B6B7_CAN_MODULE_GOES_TO_SLEEP_MODE_VALUE_BITMASK) == 0 ? 0 : 1;
+                    canModuleGoesToSleepModeSubKey = CABU_SSF_B6B7_CAN_MODULE_GOES_TO_SLEEP_MODE_AVL_ID;
+                    canModuleGoesToSleepModeSubValue = String.valueOf(canModuleGoesToSleepMode);
                 }
             } else if (key == CONTROL_STATE_FLAGS_PROPERTY_ID) {    // 4 bytes
                 String hexID = str.substring(0, size);
@@ -168,6 +177,10 @@ public class AvlData {
 
             if (engineIsWorkingSubKey != 0) {
                 xByteElement.put(engineIsWorkingSubKey, engineIsWorkingSubValue);
+            }
+
+            if (canModuleGoesToSleepModeSubKey != 0) {
+                xByteElement.put(canModuleGoesToSleepModeSubKey, canModuleGoesToSleepModeSubValue);
             }
         }
 

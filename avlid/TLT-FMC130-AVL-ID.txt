@@ -308,3 +308,4 @@
 521:UtilityStateFlags_P4
 522:CisternStateFlags_P4
 132038:CaBu_SSF_B4B6_Engine_Working+
+132055:CaBu_SSF_B6B7_CAN_Module_Goes_To_Sleep_Mode+
