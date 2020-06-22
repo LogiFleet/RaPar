@@ -47,7 +47,7 @@ public class AvlData {
 
     private IOElement ioElement;
 
-    private final DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    private final DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
 
     public AvlData(AvlDataPacket avlDataPacket, String raw) {
         this.avlDataPacket = avlDataPacket;
