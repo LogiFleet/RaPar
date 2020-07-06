@@ -8,6 +8,7 @@ import org.apache.commons.io.LineIterator;
 
 import java.io.*;
 import java.nio.file.Files;
+import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Stream;
@@ -15,6 +16,7 @@ import java.util.stream.Stream;
 public class Main {
     public static LinkedHashMap<Integer, String> DEVICE_AVL_ID;
     public static LinkedHashMap<String, String> DEVICE_AVL_ID_DESCRIPTION;
+    public static LinkedHashMap<String, Instant> IMEI_LAST_AVL_DATA_TIMESTAMP;
     public static String MANUFACTURER;
     public static String DEVICE;
     public static List<TeltonikaFotaWebDeviceInfoBean> TELONIKA_FOTA_WEB_DEVICE_INFO_LIST;
@@ -283,6 +285,8 @@ public class Main {
         }
 
         // ### parser.Main process
+
+        IMEI_LAST_AVL_DATA_TIMESTAMP = new LinkedHashMap<>();
 
         try (Stream<String> lines = Files.lines(file.toPath())) {
             fileLineCount = lines.count();

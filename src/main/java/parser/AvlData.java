@@ -1,13 +1,16 @@
 package parser;
 
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.time.DurationFormatUtils;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.LinkedHashMap;
 
 import static parser.Main.FLAG_TIME_STAMP;
+import static parser.Main.IMEI_LAST_AVL_DATA_TIMESTAMP;
 import static util.Converter.StringToByteArray;
 
 public class AvlData {
@@ -36,6 +39,9 @@ public class AvlData {
     private final String raw;
 
     private String timeStamp;
+    private String lastTimeStamp;
+    private String timeStampDiff;
+    private boolean timeStampDiffIsNegative;
     private String gatewayDate;
     private String priority;
     private float longitude;
@@ -61,6 +67,9 @@ public class AvlData {
     public String toString() {
         return  (FLAG_TIME_STAMP ? ("\"gatewayDate\":\"" + gatewayDate + "\",") : ("")) +
                 "\"timeStamp\":\"" + timeStamp + '\"' +
+                ",\"lastTimeStamp\":\"" + (lastTimeStamp != null ? lastTimeStamp : '0') + '\"' +
+                ",\"timeStampDiff\":\"" + timeStampDiff + '\"' +
+                ",\"timeStampDiffIsNegative\":\"" + (timeStampDiffIsNegative ? '1' : '0') + '\"' +
                 ",\"priority\":\"" + priority + '\"' +
                 ",\"location\":{" +
                     "\"lat\":" + String.format("%.7f", latitude) +
@@ -74,15 +83,35 @@ public class AvlData {
     }
 
     private void parse(){
-        Instant instant;
+        Instant gatewayDateInstant, lastAvlDataTimestampInstant, timeStampInstant;
+        Duration duration;
 
         if (FLAG_TIME_STAMP) {
-            instant = Instant.parse(avlDataPacket.getTimeStamp());
-            gatewayDate = fmt.format(instant.atZone(ZoneId.systemDefault()));
+            gatewayDateInstant = Instant.parse(avlDataPacket.getTimeStamp());
+            gatewayDate = fmt.format(gatewayDateInstant.atZone(ZoneId.systemDefault()));
         }
 
-        instant = Instant.ofEpochMilli(Long.parseLong(raw.substring(0,16), 16));
-        timeStamp = fmt.format(instant.atZone(ZoneId.systemDefault()));
+        lastAvlDataTimestampInstant = IMEI_LAST_AVL_DATA_TIMESTAMP.get(avlDataPacket.getImei());
+        lastTimeStamp = lastAvlDataTimestampInstant != null ? fmt.format(lastAvlDataTimestampInstant.atZone(ZoneId.systemDefault())) : null;
+
+        timeStampInstant = Instant.ofEpochMilli(Long.parseLong(raw.substring(0,16), 16));
+        timeStamp = fmt.format(timeStampInstant.atZone(ZoneId.systemDefault()));
+
+        IMEI_LAST_AVL_DATA_TIMESTAMP.put(avlDataPacket.getImei(), timeStampInstant);
+
+        if (lastAvlDataTimestampInstant != null) {
+            duration = Duration.between(lastAvlDataTimestampInstant, timeStampInstant);
+
+            if (duration.isNegative()) {
+                duration = Duration.between(timeStampInstant, lastAvlDataTimestampInstant);
+                timeStampDiffIsNegative = true;
+            } else {
+                timeStampDiffIsNegative = false;
+            }
+            timeStampDiff = DurationFormatUtils.formatDurationHMS(duration.toMillis());
+        } else {
+            timeStampDiff = "0";
+        }
 
         priority = raw.substring(16, 18);
 
