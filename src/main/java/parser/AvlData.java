@@ -26,6 +26,9 @@ public class AvlData {
     private static final String ZERO_4BYTES = "00000000";
     private static final String ZERO_STRING = "0";
 
+    // Static values from LF360 constraints
+    private static final int MINUTES_UNTIL_IGNITION_ON_NO_SIGNAL = 15;
+
     private static final int CABU_SSF_B4B6_ENGINE_WORKING_AVL_ID = 132038;    // 1320-38:Engine_is_working -> 132 for Security_State_Flags * 1000 (margin), 38 for 38th bit -> SRC: https://wiki.teltonika-gps.com/view/FMB120_CAN_adapters#CAN_Adapter_State_Flags
     private static final byte CABU_SSF_B4B6_ENGINE_WORKING_VALUE_BITMASK = 0x40;
     private static final int CABU_SSF_B4B6_ENGINE_WORKING_BYTE_POS = 4;
@@ -44,6 +47,7 @@ public class AvlData {
     private boolean timeStampDiffIsNegative;
     private String gatewayDate;
     private String gatewayDateMinusTimeStamp;
+    private boolean gatewayDateMinusTimeStampGreaterThan15Min;  //todo refactoring, naming, greater or equal to 15 min, but it's too long
     private String priority;
     private float longitude;
     private float latitude;
@@ -72,6 +76,7 @@ public class AvlData {
                 ",\"timeStampDiff\":\"" + timeStampDiff + '\"' +
                 ",\"timeStampDiffIsNegative\":\"" + (timeStampDiffIsNegative ? '1' : '0') + '\"' +
                 (FLAG_TIME_STAMP ? (",\"gatewayDateMinusTimeStamp\":\"" + gatewayDateMinusTimeStamp + "\"") : ("")) +
+                (FLAG_TIME_STAMP ? (",\"gatewayDateMinusTimeStampGreaterThan15Min\":\"" + (gatewayDateMinusTimeStampGreaterThan15Min ? '1' : '0') + "\"") : ("")) +
                 ",\"priority\":\"" + priority + '\"' +
                 ",\"location\":{" +
                     "\"lat\":" + String.format("%.7f", latitude) +
@@ -120,6 +125,9 @@ public class AvlData {
         if (FLAG_TIME_STAMP) {
             duration = Duration.between(timeStampInstant,gatewayDateInstant);
             gatewayDateMinusTimeStamp = DurationFormatUtils.formatDurationHMS(duration.toMillis());
+
+            Duration fifteenMinutes = Duration.ofMinutes(MINUTES_UNTIL_IGNITION_ON_NO_SIGNAL);
+            gatewayDateMinusTimeStampGreaterThan15Min = duration.compareTo(fifteenMinutes) >= 0;
         }
 
         priority = raw.substring(16, 18);
