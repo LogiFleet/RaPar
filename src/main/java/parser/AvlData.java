@@ -43,6 +43,7 @@ public class AvlData {
     private String timeStampDiff;
     private boolean timeStampDiffIsNegative;
     private String gatewayDate;
+    private String gatewayDateMinusTimeStamp;
     private String priority;
     private float longitude;
     private float latitude;
@@ -70,6 +71,7 @@ public class AvlData {
                 ",\"lastTimeStamp\":\"" + (lastTimeStamp != null ? lastTimeStamp : '0') + '\"' +
                 ",\"timeStampDiff\":\"" + timeStampDiff + '\"' +
                 ",\"timeStampDiffIsNegative\":\"" + (timeStampDiffIsNegative ? '1' : '0') + '\"' +
+                (FLAG_TIME_STAMP ? (",\"gatewayDateMinusTimeStamp\":\"" + gatewayDateMinusTimeStamp + "\"") : ("")) +
                 ",\"priority\":\"" + priority + '\"' +
                 ",\"location\":{" +
                     "\"lat\":" + String.format("%.7f", latitude) +
@@ -83,7 +85,9 @@ public class AvlData {
     }
 
     private void parse(){
-        Instant gatewayDateInstant, lastAvlDataTimestampInstant, timeStampInstant;
+        Instant gatewayDateInstant = null;
+        Instant lastAvlDataTimestampInstant;
+        Instant timeStampInstant;
         Duration duration;
 
         if (FLAG_TIME_STAMP) {
@@ -111,6 +115,11 @@ public class AvlData {
             timeStampDiff = DurationFormatUtils.formatDurationHMS(duration.toMillis());
         } else {
             timeStampDiff = "0";
+        }
+
+        if (FLAG_TIME_STAMP) {
+            duration = Duration.between(timeStampInstant,gatewayDateInstant);
+            gatewayDateMinusTimeStamp = DurationFormatUtils.formatDurationHMS(duration.toMillis());
         }
 
         priority = raw.substring(16, 18);
