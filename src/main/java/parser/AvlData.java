@@ -47,6 +47,7 @@ public class AvlData {
     private boolean timeStampDiffIsNegative;
     private String gatewayDate;
     private String gatewayDateMinusTimeStamp;
+    private boolean gatewayDateMinusTimeStampIsNegative;
     private boolean gatewayDateMinusTimeStampGreaterThan15Min;  //todo refactoring, naming, greater or equal to 15 min, but it's too long
     private String priority;
     private float longitude;
@@ -76,6 +77,7 @@ public class AvlData {
                 ",\"timeStampDiff\":\"" + timeStampDiff + '\"' +
                 ",\"timeStampDiffIsNegative\":\"" + (timeStampDiffIsNegative ? '1' : '0') + '\"' +
                 (FLAG_TIME_STAMP ? (",\"gatewayDateMinusTimeStamp\":\"" + gatewayDateMinusTimeStamp + "\"") : ("")) +
+                (FLAG_TIME_STAMP ? (",\"gatewayDateMinusTimeStampIsNegative\":\"" + (gatewayDateMinusTimeStampIsNegative ? '1' : '0') + "\"") : ("")) +
                 (FLAG_TIME_STAMP ? (",\"gatewayDateMinusTimeStampGreaterThan15Min\":\"" + (gatewayDateMinusTimeStampGreaterThan15Min ? '1' : '0') + "\"") : ("")) +
                 ",\"priority\":\"" + priority + '\"' +
                 ",\"location\":{" +
@@ -124,7 +126,18 @@ public class AvlData {
 
         if (FLAG_TIME_STAMP) {
             duration = Duration.between(timeStampInstant,gatewayDateInstant);
-            gatewayDateMinusTimeStamp = DurationFormatUtils.formatDurationHMS(duration.toMillis());
+
+            gatewayDateMinusTimeStampIsNegative = duration.isNegative();
+
+            if (gatewayDateMinusTimeStampIsNegative) {
+                duration = duration.abs();
+            }
+
+            try {
+                gatewayDateMinusTimeStamp = DurationFormatUtils.formatDurationHMS(duration.toMillis());
+            } catch (IllegalArgumentException e) {
+                e.printStackTrace();
+            }
 
             Duration fifteenMinutes = Duration.ofMinutes(MINUTES_UNTIL_IGNITION_ON_NO_SIGNAL);
             gatewayDateMinusTimeStampGreaterThan15Min = duration.compareTo(fifteenMinutes) >= 0;
