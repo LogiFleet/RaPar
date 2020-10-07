@@ -15,11 +15,14 @@ import static util.Converter.StringToByteArray;
 
 public class AvlData {
 
-    // Common for Teltonika FM3001, FM36M1, FMM130, FMC130
+    // Common for Teltonika FM3001, FM36M1 (not Axis_*, not present for FM36M1), FMM130, FMC130
     private static final int I_BUTTON_PROPERTY_ID = 78;
     private static final int MODULE_ID_PROPERTY_ID = 101;
     private static final int SECURITY_STATE_FLAGS_PROPERTY_ID = 132;
     private static final int CONTROL_STATE_FLAGS_PROPERTY_ID = 123;
+    private static final int Axis_X_PROPERTY_ID = 17;
+    private static final int Axis_Y_PROPERTY_ID = 18;
+    private static final int Axis_Z_PROPERTY_ID = 19;
 
     // Other static values
     private static final String ZERO_8BYTES = "0000000000000000";
@@ -226,6 +229,10 @@ public class AvlData {
             } else if (key == CONTROL_STATE_FLAGS_PROPERTY_ID) {    // 4 bytes
                 String hexID = str.substring(0, size);
                 value = ZERO_4BYTES.compareTo(hexID) == 0 ? ZERO_STRING : hexID.toUpperCase();
+            } else if (key == Axis_X_PROPERTY_ID ||key == Axis_Y_PROPERTY_ID ||key == Axis_Z_PROPERTY_ID) {    // Value is a signed short
+                String hexValue = str.substring(0, size);
+                short s = (short) Integer.parseInt(hexValue,16);
+                value = "" + s;
             } else {
                 value = String.valueOf(Long.parseUnsignedLong(str.substring(0, size), 16));
             }
