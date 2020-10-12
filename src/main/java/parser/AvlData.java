@@ -83,10 +83,12 @@ public class AvlData {
                 (FLAG_TIME_STAMP ? (",\"gatewayDateMinusTimeStampIsNegative\":\"" + (gatewayDateMinusTimeStampIsNegative ? '1' : '0') + "\"") : ("")) +
                 (FLAG_TIME_STAMP ? (",\"gatewayDateMinusTimeStampGreaterThan15Min\":\"" + (gatewayDateMinusTimeStampGreaterThan15Min ? '1' : '0') + "\"") : ("")) +
                 ",\"priority\":\"" + priority + '\"' +
-                ",\"location\":{" +
+                ",\"location\":{" + // JSON format (e.g. for Kibana import (geo map))
                     "\"lat\":" + String.format("%.7f", latitude) +
                     ",\"lon\":" + String.format("%.7f", longitude) +
                 "}" +
+                ",\"lat\":" + String.format("%.7f", latitude) +  // Google map xlsx import format
+                ",\"lon\":" + String.format("%.7f", longitude) +
                 ",\"altitude\":" + altitude +
                 ",\"angle\":" + angle +
                 ",\"satellite\":" + satellite +
