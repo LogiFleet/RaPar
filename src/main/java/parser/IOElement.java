@@ -44,7 +44,7 @@ public class IOElement {
 
     @Override
     public String toString() {
-        return "\"eventID\":" + (Main.DEVICE_AVL_ID.containsKey(eventID) ? dQS.apply(Main.DEVICE_AVL_ID.get(eventID)) : dQI.apply(eventID)) +
+        return "\"eventID\":" + (Main.DEVICE_AVL_ID.containsKey(eventID) ? dQS.apply("(" + eventID + ") " + Main.DEVICE_AVL_ID.get(eventID)) : dQI.apply(eventID)) +
                 ",\"elementCount\":" + elementCount +
                 ",\"1bElementCount\":" + oneByteElementCount + ',' + toStringWithFormatSize(oneByteElement) +
                 ",\"2bElementCount\":" + twoByteElementCount + ',' + toStringWithFormatSize(twoByteElement) +
@@ -58,7 +58,7 @@ public class IOElement {
                     String str = "";
 
                     if (Main.DEVICE_AVL_ID.containsKey(key)) {
-                        str += dQS.apply(Main.DEVICE_AVL_ID.get(key));
+                        str += dQS.apply("(" + key + ") " + Main.DEVICE_AVL_ID.get(key));
                     } else {
                         str += key;
                     }
@@ -68,7 +68,7 @@ public class IOElement {
                     String avlIdDescriptionKey = key + "." + Main.DEVICE_AVL_ID.get(key) + "." + map.get(key);
 
                     if (Main.DEVICE_AVL_ID_DESCRIPTION.containsKey(avlIdDescriptionKey)) {
-                        str += dQS.apply(Main.DEVICE_AVL_ID_DESCRIPTION.get(avlIdDescriptionKey));
+                        str += dQS.apply("(" + map.get(key) + ") " + Main.DEVICE_AVL_ID_DESCRIPTION.get(avlIdDescriptionKey));
                     } else {
                         str += dQS.apply(map.get(key));
                     }
