@@ -17,8 +17,14 @@ import java.util.stream.Stream;
  * Raw data Parser for Telematics Device
  *
  * e.g. launch arguments for fmc130:
- * -ts = timestamp
+ *
+ * - STD:
  * tlt.fmc130 tlt.fmc130.avlid tlt.fmc130.avlid.description -ts
+ *
+ * - SCP raw data file from remote server:
+ * tlt.fmc130 tlt.fmc130.avlid tlt.fmc130.avlid.description user host port rsaPublicKeyFilePath rsaPublicKeyFilePassword("null" if none) tlt.fmc130.rawdata.int.live.remote.folder tlt.fmc130.rawdata.int.live.remote.file tlt.fmc130.rawdata.int.live.local.folder tlt.fmc130.rawdata.int.live.local.file -ts
+ *
+ * -ts = timestamp
  */
 public class Main {
     public static LinkedHashMap<Integer, String> DEVICE_AVL_ID;
@@ -118,6 +124,19 @@ public class Main {
         String manufacturerDeviceAvlId = null;
         String manufacturerDeviceAvlIdDescription = null;
 
+        // To secure copy (scp) raw data file from remote server to local
+        String user = null;
+        String host = null;
+        int port;
+
+        String keyFilePath = null;
+        String keyPassword = null;
+
+        String remoteFolder = null;
+        String remoteFile = null;
+        String localFolder = null;
+        String localFile = null;
+
         if(args.length == 0 || args[0] == null)
         {
             System.out.println();
@@ -149,6 +168,20 @@ public class Main {
             manufacturerDeviceAvlIdDescription = prop.getProperty(args[2]);
             if(manufacturerDeviceAvlIdDescription != null && !manufacturerDeviceAvlIdDescription.isEmpty()) {
                 System.out.println(manufacturerDeviceAvlIdDescription);
+            }
+
+            if (args.length > 3) {  // Command line arguments contain remote server raw data file information
+                user = args[3];
+                host = args[4];
+                port = Integer.parseInt(args[5]);
+
+                keyFilePath = args[6];
+                keyPassword = args[7];
+
+                remoteFolder = prop.getProperty(args[8]);
+                remoteFile = prop.getProperty(args[9]);
+                localFolder = prop.getProperty(args[10]);
+                localFile = prop.getProperty(args[11]);
             }
         } catch (IOException ex) {
             ex.printStackTrace();
