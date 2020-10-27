@@ -1,6 +1,8 @@
 package parser;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jcraft.jsch.JSchException;
+import com.jcraft.jsch.Session;
 import com.opencsv.bean.CsvToBean;
 import com.opencsv.bean.HeaderColumnNameTranslateMappingStrategy;
 import org.apache.commons.io.FileUtils;
@@ -13,6 +15,9 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Stream;
 
+import static util.CopyFile.copyRemoteToLocal;
+import static util.CopyFile.createSession;
+
 /**
  * Raw data Parser for Telematics Device
  *
@@ -22,7 +27,7 @@ import java.util.stream.Stream;
  * tlt.fmc130 tlt.fmc130.avlid tlt.fmc130.avlid.description -ts
  *
  * - SCP raw data file from remote server:
- * tlt.fmc130 tlt.fmc130.avlid tlt.fmc130.avlid.description user host port rsaPublicKeyFilePath rsaPublicKeyFilePassword("null" if none) tlt.fmc130.rawdata.int.live.remote.folder tlt.fmc130.rawdata.int.live.remote.file tlt.fmc130.rawdata.int.live.local.folder tlt.fmc130.rawdata.int.live.local.file -ts
+ * tlt.fmc130 tlt.fmc130.avlid tlt.fmc130.avlid.description user host port rsaPublicKeyFilePath rsaPublicKeyFilePassword("null" if none) tlt.fmc130.rawdata.int.live.remote.folder tlt.fmc130.rawdata.int.live.remote.file tlt.fmc130.rawdata.int.live.local.folder -ts
  *
  * -ts = timestamp
  */
@@ -125,17 +130,16 @@ public class Main {
         String manufacturerDeviceAvlIdDescription = null;
 
         // To secure copy (scp) raw data file from remote server to local
-        String user = null;
-        String host = null;
+        String user;
+        String host;
         int port;
 
-        String keyFilePath = null;
-        String keyPassword = null;
+        String keyFilePath;
+        String keyPassword;
 
-        String remoteFolder = null;
-        String remoteFile = null;
-        String localFolder = null;
-        String localFile = null;
+        String remoteFolder;
+        String remoteFile;
+        String localFolder;
 
         if(args.length == 0 || args[0] == null)
         {
@@ -170,20 +174,32 @@ public class Main {
                 System.out.println(manufacturerDeviceAvlIdDescription);
             }
 
-            if (args.length > 3) {  // Command line arguments contain remote server raw data file information
+            if (args.length > 4) {  // Command line arguments contain remote server raw data file information
                 user = args[3];
                 host = args[4];
                 port = Integer.parseInt(args[5]);
 
                 keyFilePath = args[6];
-                keyPassword = args[7];
+                keyPassword = args[7].compareTo("null") == 0 ? null : args[7];
 
                 remoteFolder = prop.getProperty(args[8]);
                 remoteFile = prop.getProperty(args[9]);
                 localFolder = prop.getProperty(args[10]);
-                localFile = prop.getProperty(args[11]);
+
+                System.out.println(String.format("Connecting on %s as %s on port: %s", host, user, port));
+
+                Session session = createSession(user, host, port, keyFilePath, keyPassword);
+
+                System.out.println(String.format("Copying raw data file %s from remote to local, may take a while depending on file size..", remoteFolder + remoteFile));
+
+                copyRemoteToLocal(session, remoteFolder, localFolder, remoteFile);
+
+                File source = new File(localFolder + "\\" + remoteFile);
+                File dest = new File(INPUT_FILE_NAME);
+
+                FileUtils.copyFile(source, dest);
             }
-        } catch (IOException ex) {
+        } catch (IOException | JSchException ex) {
             ex.printStackTrace();
         }
 
