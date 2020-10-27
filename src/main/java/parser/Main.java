@@ -18,18 +18,16 @@ import java.util.stream.Stream;
 import static util.CopyFile.copyRemoteToLocal;
 import static util.CopyFile.createSession;
 
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
+
+//todo sample line command argument, in README.md as well
+
 /**
  * Raw data Parser for Telematics Device
- *
- * e.g. launch arguments for fmc130:
- *
- * - STD:
- * tlt.fmc130 tlt.fmc130.avlid tlt.fmc130.avlid.description -ts
- *
- * - SCP raw data file from remote server:
- * tlt.fmc130 tlt.fmc130.avlid tlt.fmc130.avlid.description user host port rsaPublicKeyFilePath rsaPublicKeyFilePassword("null" if none) tlt.fmc130.rawdata.int.live.remote.folder tlt.fmc130.rawdata.int.live.remote.file tlt.fmc130.rawdata.int.live.local.folder -ts
- *
- * -ts = timestamp
  */
 public class Main {
     public static LinkedHashMap<Integer, String> DEVICE_AVL_ID;
@@ -40,180 +38,202 @@ public class Main {
     public static List<TeltonikaFotaWebDeviceInfoBean> TELONIKA_FOTA_WEB_DEVICE_INFO_LIST;
     public static Boolean FLAG_TIME_STAMP = false;
 
-    private static String DATE_TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
-    private static String PROPERTY_MANUFACTURERS_DEVICES_FILE_NAME = "properties/ManufacturersDevices.properties";
-    private static String TELTONIKA_FOTA_WEB_DEVICE_CSV_FILE = "fota/fota_device_export.csv";
-    private static String INPUT_FILE_NAME = "data/in-raw.txt";
-    private static String OUTPUT_FILE_NAME = "data/out-ndjson.txt";
-    private static int IGNITION_CODE = 239;
-    private static String NUMBER_OF_FILE_LINES_TO_TREAT = "*";    // "*" for all
-    private static int N_WORST = 10;
+    private static final String AVL_ID_SUFFIX = "avlid";
+    private static final String AVL_ID_DESCRIPTION_SUFFIX = "description";
+
+    private static final String NOT_APPLICABLE = "na";
+
+    private static final String OPTION_MANUFACTURER = "man";
+    private static final String OPTION_MANUFACTURER_DESCRIPTION = "Manufacturer";
+    private static final String OPTION_DEVICE = "dev";
+    private static final String OPTION_DEVICE_DESCRIPTION = "Device";
+
+    private static final String OPTION_SCP = "scp";
+    private static final String OPTION_SCP_DESCRIPTION = "Secure copy file";
+
+    private static final String OPTION_USR = "usr";
+    private static final String OPTION_USR_DESCRIPTION = "User";
+    private static final String OPTION_HST = "hst";
+    private static final String OPTION_HST_DESCRIPTION = "Host";
+    private static final String OPTION_PRT = "prt";
+    private static final String OPTION_PRT_DESCRIPTION = "Port";
+    private static final String OPTION_KEY = "key";
+    private static final String OPTION_KEY_DESCRIPTION = "Key";
+    private static final String OPTION_PWD = "pwd";
+    private static final String OPTION_PWD_DESCRIPTION = "Password";
+    private static final String OPTION_RFD = "rfd";
+    private static final String OPTION_RFD_DESCRIPTION = "Remote folder";
+    private static final String OPTION_RFL = "rfl";
+    private static final String OPTION_RFL_DESCRIPTION = "Remote file";
+    private static final String OPTION_LFD = "lfd";
+    private static final String OPTION_LFD_DESCRIPTION = "Local folder";
+
+    private static final String OPTION_TS = "ts";
+    private static final String OPTION_TS_DESCRIPTION = "Time stamp";
+    private static final String OPTION_RD = "rd";
+    private static final String OPTION_RD_DESCRIPTION = "Raw data";
+
+    private static final String DATE_TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
+    private static final String PROPERTY_MANUFACTURERS_DEVICES_FILE_NAME = "properties/ManufacturersDevices.properties";
+    private static final String TELTONIKA_FOTA_WEB_DEVICE_CSV_FILE = "fota/fota_device_export.csv";
+    private static final String INPUT_FILE_NAME = "data/in-raw.txt";
+    private static final String OUTPUT_FILE_NAME = "data/out-ndjson.txt";
+    private static final int IGNITION_CODE = 239;
+    private static final String NUMBER_OF_FILE_LINES_TO_TREAT = "*";    // "*" for all
+    private static final int N_WORST = 10;
     private static HashMap<String, Integer> imeiOccurence;
-    private static String ARG_FLAG_TIME_STAMP = "-ts";
+    private static final String ARG_FLAG_TIME_STAMP = "-ts";
 
-    private static int treatmentSwitch(AvlDataPacket avlDataPacket, Writer writer, int fileLineNumber, int matchLine) {
+    /**
+     * Add a dot character separator between every keys
+     *
+     * @param args keyLevel1 keyLevel2 keyLevel3
+     * @return keyLevel1.keyLevel2.keyLevel3
+     */
+    static String keyDotSeparatedBuilder(String... args) {
+        String key = "";
 
-        // Standard
-        matchLine++;
-        int more = avlDataPacket.soutStd(writer, fileLineNumber, matchLine);
-
-        // ### Missing odometer issue
-//        if (!containFourByteElements(avlDataPacket)
-//                && !isGPRSCommandAcknowledgeMessage(avlDataPacket)
-//                && atLeastOneIgnitionEventInPacket(avlDataPacket)) {
-//
-//            matchLine++;
-//            avlDataPacket.soutStd(writer, fileLineNumber, matchLine);
-//
-//            // ### Additional data extraction for further analysis
-//
-//            if (!imeiOccurence.containsKey(avlDataPacket.getImei())) {
-//                imeiOccurence.put(avlDataPacket.getImei(), 1);
-//            } else {
-//                imeiOccurence.computeIfPresent(avlDataPacket.getImei(), (k, v) -> v + 1);
-//            }
-//
-//            // ###
-//        }
-        // ###
-
-        return matchLine + more;
-    }
-
-    private static boolean atLeastOneIgnitionEventInPacket(AvlDataPacket avlDataPacket) {
-        List<AvlData> avlDataList = avlDataPacket.getAvlDataList();
-
-        for (AvlData avlData : avlDataList) {
-            if (avlData.getIoElement().getEventID() == IGNITION_CODE) {
-                return true;
-            }
+        for (String str : args) {
+            key += str + '.';
         }
 
-        return false;
+        // remove last '.' from key String
+        return key.substring(0, key.length() - 1);
     }
 
-    private static boolean isGPRSCommandAcknowledgeMessage(AvlDataPacket avlDataPacket) {
-        // GPRS acknowledge message are sent with '0c' codec
-        return "0c".equalsIgnoreCase(avlDataPacket.getCodecID());
+    private static CommandLine parseCommandLineArguments(String... args) {
+        CommandLine cmd = null;
+        Options options = new Options();
+        CommandLineParser parser = new DefaultParser();
+
+        options.addOption(OPTION_MANUFACTURER, true, OPTION_MANUFACTURER_DESCRIPTION);
+        options.addOption(OPTION_DEVICE, true, OPTION_DEVICE_DESCRIPTION);
+
+        options.addOption(OPTION_SCP, false, OPTION_SCP_DESCRIPTION);
+
+        options.addOption(OPTION_USR, true, OPTION_USR_DESCRIPTION);
+        options.addOption(OPTION_HST, true, OPTION_HST_DESCRIPTION);
+        options.addOption(OPTION_PRT, true, OPTION_PRT_DESCRIPTION);
+        options.addOption(OPTION_KEY, true, OPTION_KEY_DESCRIPTION);
+        options.addOption(OPTION_PWD, true, OPTION_PWD_DESCRIPTION);
+        options.addOption(OPTION_RFD, true, OPTION_RFD_DESCRIPTION);
+        options.addOption(OPTION_RFL, true, OPTION_RFL_DESCRIPTION);
+        options.addOption(OPTION_LFD, true, OPTION_LFD_DESCRIPTION);
+
+        options.addOption(OPTION_TS, false, OPTION_TS_DESCRIPTION);
+        options.addOption(OPTION_RD, false, OPTION_RD_DESCRIPTION);
+
+        try {
+            cmd = parser.parse(options, args);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+        return cmd;
+    }
+
+    private static void sysOutFormatted(String key, String value) {
+        System.out.println(String.format("%-25s", key + ":").replace(' ', '_') + value);
     }
 
     /**
-     * Method to check if message contain 4 Byte elements
-     * Used to put in evidence messages without odometer IO property (99), use case.
-     * @param avlDataPacket
-     * @return
+     * To secure copy (scp) raw data file from remote server to local
+     * @param commandLine
      */
-    private static boolean containFourByteElements(AvlDataPacket avlDataPacket) {
-        int fourByteElementCount = 0;
+    private static void secureCopyFileFromRemoteServer(CommandLine commandLine) {
+        String user, host, port;
+        String keyFilePath, keyPassword;
+        String remoteFolder, remoteFile, localFolder;
 
-        List<AvlData> avlDataList = avlDataPacket.getAvlDataList();
+        user  = commandLine.getOptionValue(OPTION_USR);
+        host = commandLine.getOptionValue(OPTION_HST);
+        port = commandLine.getOptionValue(OPTION_PRT);
 
-        for (AvlData avlData : avlDataList) {
-            if (avlData.getIoElement().getFourByteElementCount() != 0) {
-                fourByteElementCount++;
-            }
+        keyFilePath = commandLine.getOptionValue(OPTION_KEY);
+        keyPassword = commandLine.hasOption(OPTION_KEY) ? commandLine.getOptionValue(OPTION_PWD) : null;
+
+        remoteFolder = commandLine.getOptionValue(OPTION_RFD);
+        remoteFile = commandLine.getOptionValue(OPTION_RFL);
+        localFolder = commandLine.getOptionValue(OPTION_LFD);
+
+        sysOutFormatted(OPTION_USR_DESCRIPTION, user);
+        sysOutFormatted(OPTION_HST_DESCRIPTION, host);
+        sysOutFormatted(OPTION_PRT_DESCRIPTION, port);
+
+        sysOutFormatted(OPTION_KEY_DESCRIPTION, keyFilePath);
+        sysOutFormatted(OPTION_PWD_DESCRIPTION, keyPassword);
+
+        sysOutFormatted(OPTION_RFD_DESCRIPTION, remoteFolder);
+        sysOutFormatted(OPTION_RFL_DESCRIPTION, remoteFile);
+        sysOutFormatted(OPTION_LFD_DESCRIPTION, localFolder);
+
+        System.out.println();
+        System.out.println(String.format("Connecting on %s as %s on port: %s", host, user, port));
+
+        Session session = createSession(user, host, Integer.parseInt(port), keyFilePath, keyPassword);
+
+        System.out.println(String.format("Copying raw data file %s from remote to local, may take a while depending on file size..", remoteFolder + remoteFile));
+
+        try {
+            copyRemoteToLocal(session, remoteFolder, localFolder, remoteFile);
+
+            File source = new File(localFolder + "\\" + remoteFile);
+            File dest = new File(INPUT_FILE_NAME);
+            // todo check why out file is not populated, probably an end of line character mismatching
+            FileUtils.copyFile(source, dest);
+            System.out.println();
+        } catch (JSchException | IOException e) {
+            e.printStackTrace();
         }
-
-        return fourByteElementCount != 0;
     }
 
     public static void main(String[] args) throws IOException {
+        CommandLine commandLine;
+        String deviceSelector;
+        String manufacturerDeviceAvlId;
+        String manufacturerDeviceAvlIdDescription;
+        InputStream propertyFile;
+        boolean scpOption;
 
-        // e.g.:
-        // - args[0]=tlt.fmm130
-        // - args[1]=tlt.fmm130.avlid
-        // - args[2]=tlt.fmm130.avlid.description
-        // see ManufacturersDevices.properties for more
+        commandLine = parseCommandLineArguments(args);
 
-        String deviceSelector = null;
-        String manufacturerDeviceAvlId = null;
-        String manufacturerDeviceAvlIdDescription = null;
+        MANUFACTURER = commandLine.getOptionValue(OPTION_MANUFACTURER);
+        DEVICE = commandLine.getOptionValue(OPTION_DEVICE);
+        deviceSelector = keyDotSeparatedBuilder(MANUFACTURER, DEVICE);
 
-        // To secure copy (scp) raw data file from remote server to local
-        String user;
-        String host;
-        int port;
+        sysOutFormatted("Selector", deviceSelector);
+        sysOutFormatted(OPTION_MANUFACTURER_DESCRIPTION, MANUFACTURER);
+        sysOutFormatted(OPTION_DEVICE_DESCRIPTION, DEVICE);
 
-        String keyFilePath;
-        String keyPassword;
+        propertyFile = new FileInputStream(Main.class.getClassLoader().getResource(PROPERTY_MANUFACTURERS_DEVICES_FILE_NAME).getFile());
+        Properties properties = new Properties();
+        properties.load(propertyFile);
 
-        String remoteFolder;
-        String remoteFile;
-        String localFolder;
+        // get the property value and print it out
+        manufacturerDeviceAvlId = properties.getProperty(keyDotSeparatedBuilder(deviceSelector, AVL_ID_SUFFIX));
+        if (manufacturerDeviceAvlId != null && !manufacturerDeviceAvlId.isEmpty()) {
+            sysOutFormatted("AVL ID", manufacturerDeviceAvlId);
+        }
 
-        if(args.length == 0 || args[0] == null)
-        {
+        manufacturerDeviceAvlIdDescription = properties.getProperty(keyDotSeparatedBuilder(deviceSelector, AVL_ID_SUFFIX, AVL_ID_DESCRIPTION_SUFFIX));
+        if (manufacturerDeviceAvlIdDescription != null && !manufacturerDeviceAvlIdDescription.isEmpty()) {
+            sysOutFormatted("AVL ID DESCRIPTION", manufacturerDeviceAvlIdDescription);
+        }
+
+        scpOption = commandLine.hasOption(OPTION_SCP);
+
+        if (scpOption) {
             System.out.println();
-            System.out.println("Proper usage is args[0] args[1] args[2] as: manufacturer.device manufacturer.device.avlid manufacturer.device.avlid.description");
-            System.exit(0);
-        } else {
-            deviceSelector = args[0];
         }
 
-        MANUFACTURER = deviceSelector.split("\\.")[0];
-        DEVICE = deviceSelector.split("\\.")[1];
+        sysOutFormatted("SCP Option", String.valueOf(scpOption));
+        System.out.println();
 
-        System.out.print("Selector: " + deviceSelector + ", ");
-        System.out.print("Manufacturer: " + MANUFACTURER + ", ");
-        System.out.print("Device: " + DEVICE + ", ");
-
-        try (InputStream input = new FileInputStream(Main.class.getClassLoader().getResource(PROPERTY_MANUFACTURERS_DEVICES_FILE_NAME).getFile())) {
-            Properties prop = new Properties();
-
-            // load a properties file
-            prop.load(input);
-
-            // get the property value and print it out
-            manufacturerDeviceAvlId = prop.getProperty(args[1]);
-            if(manufacturerDeviceAvlId != null && !manufacturerDeviceAvlId.isEmpty()) {
-                System.out.print(manufacturerDeviceAvlId + ", ");
-            }
-
-            manufacturerDeviceAvlIdDescription = prop.getProperty(args[2]);
-            if(manufacturerDeviceAvlIdDescription != null && !manufacturerDeviceAvlIdDescription.isEmpty()) {
-                System.out.println(manufacturerDeviceAvlIdDescription);
-            }
-
-            if (args.length > 4) {  // Command line arguments contain remote server raw data file information
-                user = args[3];
-                host = args[4];
-                port = Integer.parseInt(args[5]);
-
-                keyFilePath = args[6];
-                keyPassword = args[7].compareTo("null") == 0 ? null : args[7];
-
-                remoteFolder = prop.getProperty(args[8]);
-                remoteFile = prop.getProperty(args[9]);
-                localFolder = prop.getProperty(args[10]);
-
-                System.out.println(String.format("Connecting on %s as %s on port: %s", host, user, port));
-
-                Session session = createSession(user, host, port, keyFilePath, keyPassword);
-
-                System.out.println(String.format("Copying raw data file %s from remote to local, may take a while depending on file size..", remoteFolder + remoteFile));
-
-                copyRemoteToLocal(session, remoteFolder, localFolder, remoteFile);
-
-                File source = new File(localFolder + "\\" + remoteFile);
-                File dest = new File(INPUT_FILE_NAME);
-
-                FileUtils.copyFile(source, dest);
-            }
-        } catch (IOException | JSchException ex) {
-            ex.printStackTrace();
+        if (scpOption) {
+            secureCopyFileFromRemoteServer(commandLine);
         }
 
-        if(manufacturerDeviceAvlId == null || manufacturerDeviceAvlId.isEmpty())
-        {
-            System.out.println("Proper usage in ManufacturersDevices.properties file is: manufacturer.device.avlid=file name (avl-id)");
-            System.exit(0);
-        }
-
-        if(manufacturerDeviceAvlIdDescription == null || manufacturerDeviceAvlIdDescription.isEmpty())
-        {
-            System.out.println("Proper usage in ManufacturersDevices.properties file is: manufacturer.device.avlid.description=file name (avl-id with description)");
-            System.exit(0);
-        }
+//        System.exit(0);
 
         File propertyIdFile = new File(manufacturerDeviceAvlId);
         DEVICE_AVL_ID = new LinkedHashMap<>();
@@ -226,7 +246,7 @@ public class Main {
         File file = new File(INPUT_FILE_NAME);
         LineIterator it = null;
         imeiOccurence = new HashMap<>();
-        long fileLineCount=0;
+        long fileLineCount = 0;
         Writer fileTxtWriter = new FileWriter(OUTPUT_FILE_NAME, false); //overwrites file
         int fileLineNumber = 0;
         int matchLine = 0;
@@ -237,7 +257,7 @@ public class Main {
 
         // ### Argument flags: BEGIN
 
-        for(String arg: args) {
+        for (String arg : args) {
 
             // -ts for timestamp in raw data log for server gateway date
             // log without timestamp = imei;raw e.g. 864394040101331;000000000000008408010000...
@@ -262,7 +282,7 @@ public class Main {
                 String str = it.nextLine();
                 String[] parts = str.split(":");
 
-                Integer key = Integer.parseInt( parts[0].trim());
+                Integer key = Integer.parseInt(parts[0].trim());
                 String value = parts[1].trim();
 
                 DEVICE_AVL_ID.put(key, value);
@@ -388,9 +408,12 @@ public class Main {
                 avlDataPacket.process();
 
                 fileLineNumber++;
-                matchLine = treatmentSwitch(avlDataPacket, fileTxtWriter, fileLineNumber, matchLine);
 
-                processedPercentage = (int)Math.round((((double)fileLineNumber / (double)lineToTreat) * 100.0));
+                matchLine++;
+                int more = avlDataPacket.soutStd(fileTxtWriter, fileLineNumber, matchLine);
+                matchLine += more;
+
+                processedPercentage = (int) Math.round((((double) fileLineNumber / (double) lineToTreat) * 100.0));
                 System.out.print("Processing: " + processedPercentage + "% " + animationChars[processedPercentage % 4] + "\r");
             }
         } finally {
@@ -400,22 +423,10 @@ public class Main {
         System.out.println("Processing: Done!");
         System.out.print("Total: ");
         System.out.print(matchLine + " matched in " + lineToTreat);
+        System.out.println();
 
         fileTxtWriter.close();
-
-//        System.out.println();
-//        System.out.println("the " + N_WORST + " worst");
-//
-//        final util.IntWrapper dWrapper = new util.IntWrapper(N_WORST);
-//
-//        imeiOccurence.entrySet()
-//                .stream().limit(N_WORST)
-//                .sorted(Collections.reverseOrder(Map.Entry.comparingByValue()))
-//                .forEach(k -> {
-//                    System.out.println(String.format("%03d", dWrapper.value) + ". " + k.getKey() + " = " + k.getValue());
-//                    dWrapper.value--;
-//                });
-
     }
 
 }
+
