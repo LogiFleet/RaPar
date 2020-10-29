@@ -36,12 +36,11 @@ public class Main {
     public static String MANUFACTURER;
     public static String DEVICE;
     public static List<TeltonikaFotaWebDeviceInfoBean> TELONIKA_FOTA_WEB_DEVICE_INFO_LIST;
-    public static Boolean FLAG_TIME_STAMP = false;
+    public static boolean FLAG_TIME_STAMP = false;
+    public static boolean FLAG_RAW_DATA = false;
 
     private static final String AVL_ID_SUFFIX = "avlid";
     private static final String AVL_ID_DESCRIPTION_SUFFIX = "description";
-
-    private static final String NOT_APPLICABLE = "na";
 
     private static final String OPTION_MANUFACTURER = "man";
     private static final String OPTION_MANUFACTURER_DESCRIPTION = "Manufacturer";
@@ -233,8 +232,6 @@ public class Main {
             secureCopyFileFromRemoteServer(commandLine);
         }
 
-//        System.exit(0);
-
         File propertyIdFile = new File(manufacturerDeviceAvlId);
         DEVICE_AVL_ID = new LinkedHashMap<>();
 
@@ -255,19 +252,8 @@ public class Main {
         long lineToTreat = 0;
         ObjectMapper mapper = new ObjectMapper();
 
-        // ### Argument flags: BEGIN
-
-        for (String arg : args) {
-
-            // -ts for timestamp in raw data log for server gateway date
-            // log without timestamp = imei;raw e.g. 864394040101331;000000000000008408010000...
-            // log with timestamp = imei;timestamp;raw e.g. 864394040101331;2020-06-15T05:12:45.303Z;000000000000008408010000...
-            if (arg.compareTo(ARG_FLAG_TIME_STAMP) == 0) {
-                FLAG_TIME_STAMP = true;
-            }
-        }
-
-        // ### Argument flags: END
+        FLAG_TIME_STAMP = commandLine.hasOption(OPTION_TS);
+        FLAG_RAW_DATA = commandLine.hasOption(OPTION_RD);
 
         // ### Device AVL ID file
 

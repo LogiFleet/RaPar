@@ -7,6 +7,8 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
 
+import static parser.Main.FLAG_RAW_DATA;
+
 public class AvlDataPacket {
 
     private String raw;
@@ -161,6 +163,13 @@ public class AvlDataPacket {
                         .findFirst()
                         .orElse(null);
 
+                String rawWithoutLogHeader = "";
+
+                if (FLAG_RAW_DATA) {
+                    rawWithoutLogHeader = raw.substring(raw.indexOf(";") + 1); // Remove imei
+                    rawWithoutLogHeader = rawWithoutLogHeader.substring(rawWithoutLogHeader.indexOf(";") + 1);    // Remove timestamp
+                }
+
                 writer.write(
                         '{' +
 
@@ -189,7 +198,7 @@ public class AvlDataPacket {
                                         (",\"lastLogin\":\"" + (tltBean.getLastLogin() != "" ? tltBean.getLastLogin() : "na") + '\"')
                                         : "") +
 
-//                            ",\"raw\":\"" + raw + "\"" +
+                                (FLAG_RAW_DATA ? (",\"rawData\":\"" + rawWithoutLogHeader + "\"") : ("")) +
 
                         '}' +
 

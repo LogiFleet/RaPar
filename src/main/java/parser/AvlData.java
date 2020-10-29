@@ -9,8 +9,7 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.LinkedHashMap;
 
-import static parser.Main.FLAG_TIME_STAMP;
-import static parser.Main.IMEI_LAST_AVL_DATA_TIMESTAMP;
+import static parser.Main.*;
 import static util.Converter.StringToByteArray;
 
 public class AvlData {
