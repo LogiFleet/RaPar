@@ -5,26 +5,18 @@ import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import com.opencsv.bean.CsvToBean;
 import com.opencsv.bean.HeaderColumnNameTranslateMappingStrategy;
+import org.apache.commons.cli.*;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.LineIterator;
 
 import java.io.*;
 import java.nio.file.Files;
 import java.time.Instant;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Stream;
 
 import static util.CopyFile.copyRemoteToLocal;
 import static util.CopyFile.createSession;
-
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.DefaultParser;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
-
-//todo sample line command argument, in README.md as well
 
 /**
  * Raw data Parser for Telematics Device
@@ -77,11 +69,7 @@ public class Main {
     private static final String TELTONIKA_FOTA_WEB_DEVICE_CSV_FILE = "fota/fota_device_export.csv";
     private static final String INPUT_FILE_NAME = "data/in-raw.txt";
     private static final String OUTPUT_FILE_NAME = "data/out-ndjson.txt";
-    private static final int IGNITION_CODE = 239;
     private static final String NUMBER_OF_FILE_LINES_TO_TREAT = "*";    // "*" for all
-    private static final int N_WORST = 10;
-    private static HashMap<String, Integer> imeiOccurence;
-    private static final String ARG_FLAG_TIME_STAMP = "-ts";
 
     /**
      * Add a dot character separator between every keys
@@ -178,7 +166,6 @@ public class Main {
 
             File source = new File(localFolder + "\\" + remoteFile);
             File dest = new File(INPUT_FILE_NAME);
-            // todo check why out file is not populated, probably an end of line character mismatching
             FileUtils.copyFile(source, dest);
             System.out.println();
         } catch (JSchException | IOException e) {
@@ -238,11 +225,8 @@ public class Main {
         File propertyIdFileDescription = new File(manufacturerDeviceAvlIdDescription);
         DEVICE_AVL_ID_DESCRIPTION = new LinkedHashMap<>();
 
-        List<AvlDataPacket> list = new ArrayList<>();
-        DateTimeFormatter fmt = DateTimeFormatter.ofPattern(DATE_TIME_FORMAT);
         File file = new File(INPUT_FILE_NAME);
         LineIterator it = null;
-        imeiOccurence = new HashMap<>();
         long fileLineCount = 0;
         Writer fileTxtWriter = new FileWriter(OUTPUT_FILE_NAME, false); //overwrites file
         int fileLineNumber = 0;
@@ -277,14 +261,6 @@ public class Main {
             LineIterator.closeQuietly(it);
         }
 
-        // sout DEVICE_AVL_ID
-//        for (Map.Entry<Integer, String> entry : DEVICE_AVL_ID.entrySet()) {
-//            Integer key = entry.getKey();
-//            String value = entry.getValue();
-//
-//            System.out.println(key + " -> " + value);
-//        }
-
         // ### Device AVL ID DESCRIPTION file
 
         try {
@@ -307,16 +283,6 @@ public class Main {
             LineIterator.closeQuietly(it);
         }
 
-        // sout DEVICE_AVL_ID
-//        for (Map.Entry<Integer, String> entry : DEVICE_AVL_ID.entrySet()) {
-//            Integer key = entry.getKey();
-//            String value = entry.getValue();
-//
-//            System.out.println(key + " -> " + value);
-//        }
-
-        // ###
-
         // ### Fota device file
 
         try (Reader csvReader = new BufferedReader(new FileReader(TELTONIKA_FOTA_WEB_DEVICE_CSV_FILE))) {
@@ -337,13 +303,7 @@ public class Main {
             strategy.setColumnMapping(mapping);
 
             CsvToBean<TeltonikaFotaWebDeviceInfoBean> csvToBean = new CsvToBean<TeltonikaFotaWebDeviceInfoBean>();
-            TELONIKA_FOTA_WEB_DEVICE_INFO_LIST = csvToBean.parse(strategy, csvReader);
-
-//            // Debug
-//            for(parser.TeltonikaFotaWebDeviceInfoBean t : TELONIKA_FOTA_WEB_DEVICE_INFO_LIST)
-//            {
-//                System.out.println(t);
-//            }
+            TELONIKA_FOTA_WEB_DEVICE_INFO_LIST = csvToBean.parse(strategy, csvReader);  //todo replace deprecated parse method
         }
 
         // ### parser.Main process
