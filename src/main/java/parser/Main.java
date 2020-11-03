@@ -25,6 +25,7 @@ public class Main {
     public static LinkedHashMap<Integer, String> DEVICE_AVL_ID;
     public static LinkedHashMap<String, String> DEVICE_AVL_ID_DESCRIPTION;
     public static LinkedHashMap<String, Instant> IMEI_LAST_AVL_DATA_TIMESTAMP;
+    public static LinkedHashMap<String, String> IMEI_NAME;
     public static String MANUFACTURER;
     public static String DEVICE;
     public static List<TeltonikaFotaWebDeviceInfoBean> TELONIKA_FOTA_WEB_DEVICE_INFO_LIST;
@@ -64,11 +65,12 @@ public class Main {
     private static final String OPTION_RD = "rd";
     private static final String OPTION_RD_DESCRIPTION = "Raw data";
 
-    private static final String DATE_TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
     private static final String PROPERTY_MANUFACTURERS_DEVICES_FILE_NAME = "properties/ManufacturersDevices.properties";
-    private static final String TELTONIKA_FOTA_WEB_DEVICE_CSV_FILE = "fota/fota_device_export.csv";
+    private static final String TELTONIKA_FOTA_WEB_DEVICE_CSV_FILE_NAME = "msc/fota_device_export.csv";
+    private static final String IMEI_NAME_FILE_NAME = "msc/imeiName.txt";
     private static final String INPUT_FILE_NAME = "data/in-raw.txt";
     private static final String OUTPUT_FILE_NAME = "data/out-ndjson.txt";
+
     private static final String NUMBER_OF_FILE_LINES_TO_TREAT = "*";    // "*" for all
 
     /**
@@ -236,9 +238,6 @@ public class Main {
         long lineToTreat = 0;
         ObjectMapper mapper = new ObjectMapper();
 
-        FLAG_TIME_STAMP = commandLine.hasOption(OPTION_TS);
-        FLAG_RAW_DATA = commandLine.hasOption(OPTION_RD);
-
         // ### Device AVL ID file
 
         try {
@@ -285,7 +284,7 @@ public class Main {
 
         // ### Fota device file
 
-        try (Reader csvReader = new BufferedReader(new FileReader(TELTONIKA_FOTA_WEB_DEVICE_CSV_FILE))) {
+        try (Reader csvReader = new BufferedReader(new FileReader(TELTONIKA_FOTA_WEB_DEVICE_CSV_FILE_NAME))) {
 
             Map<String, String> mapping = new HashMap<String, String>();
             mapping.put("imei", "imei");
@@ -306,7 +305,37 @@ public class Main {
             TELONIKA_FOTA_WEB_DEVICE_INFO_LIST = csvToBean.parse(strategy, csvReader);  //todo replace deprecated parse method
         }
 
-        // ### parser.Main process
+        // ### Imei name file
+
+        File imeiName = new File(IMEI_NAME_FILE_NAME);
+        IMEI_NAME = new LinkedHashMap<>();
+
+        try {
+            it = FileUtils.lineIterator(imeiName, "UTF-8");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            while (it.hasNext()) {
+                String str = it.nextLine();
+                String[] parts = str.split(":");
+
+                String key = parts[0].trim();
+                String value = parts[1].trim();
+
+                IMEI_NAME.put(key, value);
+            }
+        } finally {
+            LineIterator.closeQuietly(it);
+        }
+
+        // ### Command line flag arguments
+
+        FLAG_TIME_STAMP = commandLine.hasOption(OPTION_TS);
+        FLAG_RAW_DATA = commandLine.hasOption(OPTION_RD);
+
+        // ### Parser Main Process
 
         IMEI_LAST_AVL_DATA_TIMESTAMP = new LinkedHashMap<>();
 

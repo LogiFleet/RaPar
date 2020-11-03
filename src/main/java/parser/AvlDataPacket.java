@@ -179,7 +179,7 @@ public class AvlDataPacket {
                             ",\"manufacturer\":\"" + Main.MANUFACTURER + '\"' +
                             ",\"device\":\"" + Main.DEVICE + '\"' +
 
-                            ",\"imei\":\"" + imei + "\",\"messageTotal\":" + size + ",\"messageIndex\":" + (i + 1) + ',' + avlDataList.get(i) +
+                            ",\"imei\":\"" + imei + "\"," + (Main.IMEI_NAME.containsKey(imei) ? "\"imeiName\":\"" + Main.IMEI_NAME.get(imei) + "\"," : "") + "\"messageTotal\":" + size + ",\"messageIndex\":" + (i + 1) + ',' + avlDataList.get(i) +
 
                             ",\"length\":\"" + avlDataLength + '\"' +
                             ",\"codec\":\"" + codecID + '\"' +
