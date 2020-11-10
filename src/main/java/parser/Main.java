@@ -361,15 +361,29 @@ public class Main {
                 String str = it.nextLine();
                 AvlDataPacket avlDataPacket;
 
+                // Size of timestamp is dynamic, because sometimes there is and sometimes there is no millisecond at the end, e.g.:
+                // - 2020-11-09T06:44:50.120Z
+                // - 2020-11-09T06:44:54Z
+                int zuluTimeZPosition = str.indexOf('Z');
+                int zuluTimeZPositionOffset;
+
+                if (zuluTimeZPosition == 39) {
+                    zuluTimeZPositionOffset = 0;
+                } else if (zuluTimeZPosition == 35) {
+                    zuluTimeZPositionOffset = -4;
+                } else {
+                    throw new java.lang.RuntimeException("Z, for zulu time, in log timestamp, bad position.");
+                }
+
                 if (FLAG_TIME_STAMP) {
                     avlDataPacket = new AvlDataPacket(str,
                             str.substring(0, 15),
-                            str.substring(16, 40),
-                            str.substring(41, 49),
-                            str.substring(49, 57),
-                            str.substring(57, 59),
-                            str.substring(59, 61),
-                            str.substring(61));
+                            str.substring(16, 40 + zuluTimeZPositionOffset),
+                            str.substring(41 + zuluTimeZPositionOffset, 49 + zuluTimeZPositionOffset),
+                            str.substring(49 + zuluTimeZPositionOffset, 57 + zuluTimeZPositionOffset),
+                            str.substring(57 + zuluTimeZPositionOffset, 59 + zuluTimeZPositionOffset),
+                            str.substring(59 + zuluTimeZPositionOffset, 61 + zuluTimeZPositionOffset),
+                            str.substring(61 + zuluTimeZPositionOffset));
                 } else {
                     avlDataPacket = new AvlDataPacket(str,
                             str.substring(0, 15),
