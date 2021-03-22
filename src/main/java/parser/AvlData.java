@@ -19,6 +19,7 @@ public class AvlData {
     private static final int MODULE_ID_PROPERTY_ID = 101;
     private static final int SECURITY_STATE_FLAGS_PROPERTY_ID = 132;
     private static final int CONTROL_STATE_FLAGS_PROPERTY_ID = 123;
+    private static final int DIGITAL_INPUT_2_PROPERTY_ID = 2;
     private static final int Axis_X_PROPERTY_ID = 17;
     private static final int Axis_Y_PROPERTY_ID = 18;
     private static final int Axis_Z_PROPERTY_ID = 19;
@@ -51,6 +52,7 @@ public class AvlData {
     private String gatewayDateMinusTimeStamp;
     private boolean gatewayDateMinusTimeStampIsNegative;
     private boolean gatewayDateMinusTimeStampGreaterThan15Min;  //todo refactoring, naming, greater or equal to 15 min, but it's too long
+    private boolean digitalInput2StateHasChanged;   // Business Private switch
     private String priority;
     private float longitude;
     private float latitude;
@@ -81,6 +83,7 @@ public class AvlData {
                 (FLAG_TIME_STAMP ? (",\"gatewayDateMinusTimeStamp\":\"" + gatewayDateMinusTimeStamp + "\"") : ("")) +
                 (FLAG_TIME_STAMP ? (",\"gatewayDateMinusTimeStampIsNegative\":\"" + (gatewayDateMinusTimeStampIsNegative ? '1' : '0') + "\"") : ("")) +
                 (FLAG_TIME_STAMP ? (",\"gatewayDateMinusTimeStampGreaterThan15Min\":\"" + (gatewayDateMinusTimeStampGreaterThan15Min ? '1' : '0') + "\"") : ("")) +
+                ",\"digitalInput2StateHasChanged\":\"" + (IMEI_DIGITAL_INPUT_2_STATE_HAS_CHANGED.get(avlDataPacket.getImei()) != null ? digitalInput2StateHasChanged : "na") + '\"' +
                 ",\"priority\":\"" + priority + '\"' +
                 ",\"location\":{" + // JSON format (e.g. for Kibana import (geo map))
                     "\"lat\":" + String.format("%.7f", latitude) +
@@ -232,8 +235,26 @@ public class AvlData {
                 value = ZERO_4BYTES.compareTo(hexID) == 0 ? ZERO_STRING : hexID.toUpperCase();
             } else if (key == Axis_X_PROPERTY_ID ||key == Axis_Y_PROPERTY_ID ||key == Axis_Z_PROPERTY_ID) {    // Value is a signed short
                 String hexValue = str.substring(0, size);
-                short s = (short) Integer.parseInt(hexValue,16);
+                short s = (short) Integer.parseInt(hexValue, 16);
                 value = "" + s;
+            } else if (key == DIGITAL_INPUT_2_PROPERTY_ID) {
+                value = String.valueOf(Long.parseUnsignedLong(str.substring(0, size), 16));
+
+                Boolean currentDigitalInput2State = value.compareTo("1") == 0 ? Boolean.TRUE : Boolean.FALSE;
+
+                if (IMEI_DIGITAL_INPUT_2_STATE_HAS_CHANGED.get(avlDataPacket.getImei()) != null) {
+                    Boolean lastDigitalInput2State = IMEI_DIGITAL_INPUT_2_STATE_HAS_CHANGED.get(avlDataPacket.getImei());
+                    if (currentDigitalInput2State != lastDigitalInput2State) {
+                        digitalInput2StateHasChanged = true;
+                    } else {
+                        digitalInput2StateHasChanged = false;
+                    }
+                } else {
+                    digitalInput2StateHasChanged = false;
+                }
+
+                IMEI_DIGITAL_INPUT_2_STATE_HAS_CHANGED.put(avlDataPacket.getImei(), currentDigitalInput2State);
+
             } else {
                 value = String.valueOf(Long.parseUnsignedLong(str.substring(0, size), 16));
             }
