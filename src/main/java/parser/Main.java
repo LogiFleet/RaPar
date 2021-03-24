@@ -3,14 +3,15 @@ package parser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
-import com.opencsv.bean.CsvToBean;
-import com.opencsv.bean.HeaderColumnNameTranslateMappingStrategy;
+import com.opencsv.bean.CsvToBeanBuilder;
 import org.apache.commons.cli.*;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.LineIterator;
 
 import java.io.*;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.Instant;
 import java.util.*;
 import java.util.stream.Stream;
@@ -67,7 +68,8 @@ public class Main {
     private static final String OPTION_RD_DESCRIPTION = "Raw data";
 
     private static final String PROPERTY_MANUFACTURERS_DEVICES_FILE_NAME = "properties/ManufacturersDevices.properties";
-    private static final String TELTONIKA_FOTA_WEB_DEVICE_CSV_FILE_NAME = "msc/fota_device_export.csv";
+    private static final String TELTONIKA_FOTA_WEB_DEVICE_EXPORT_FOLDER = "teltonikafotawebexport";
+    private static final String TELTONIKA_FOTA_WEB_DEVICE_EXPORT_FILE_EXTENSION = "csv";
     private static final String IMEI_NAME_FILE_NAME = "msc/imeiName.txt";
     private static final String INPUT_FILE_NAME = "data/in-raw.txt";
     private static final String OUTPUT_FILE_NAME = "data/out-ndjson.txt";
@@ -128,6 +130,7 @@ public class Main {
 
     /**
      * To secure copy (scp) raw data file from remote server to local
+     *
      * @param commandLine
      */
     private static void secureCopyFileFromRemoteServer(CommandLine commandLine) {
@@ -135,7 +138,7 @@ public class Main {
         String keyFilePath, keyPassword;
         String remoteFolder, remoteFile, localFolder;
 
-        user  = commandLine.getOptionValue(OPTION_USR);
+        user = commandLine.getOptionValue(OPTION_USR);
         host = commandLine.getOptionValue(OPTION_HST);
         port = commandLine.getOptionValue(OPTION_PRT);
 
@@ -283,30 +286,22 @@ public class Main {
             LineIterator.closeQuietly(it);
         }
 
-        // ### Fota device file
+        // ### FOTA Web export device info file dropped in teltonikafotawebexport folder as is
 
-        try (Reader csvReader = new BufferedReader(new FileReader(TELTONIKA_FOTA_WEB_DEVICE_CSV_FILE_NAME))) {
+        Optional<String> firstFile = Optional.empty();
 
-            Map<String, String> mapping = new HashMap<String, String>();
-            mapping.put("imei", "imei");
-            mapping.put("sn", "sn");
-            mapping.put("model", "model");
-            mapping.put("firmware", "firmware");
-            mapping.put("configuration", "configuration");
-            mapping.put("description", "description");
-            mapping.put("companyname", "companyName");
-            mapping.put("group", "group");
-            mapping.put("lastlogin", "lastLogin");
-
-            HeaderColumnNameTranslateMappingStrategy<TeltonikaFotaWebDeviceInfoBean> strategy = new HeaderColumnNameTranslateMappingStrategy<TeltonikaFotaWebDeviceInfoBean>();
-            strategy.setType(TeltonikaFotaWebDeviceInfoBean.class);
-            strategy.setColumnMapping(mapping);
-
-            CsvToBean<TeltonikaFotaWebDeviceInfoBean> csvToBean = new CsvToBean<TeltonikaFotaWebDeviceInfoBean>();
-            TELONIKA_FOTA_WEB_DEVICE_INFO_LIST = csvToBean.parse(strategy, csvReader);  //todo replace deprecated parse method
+        try {
+            firstFile = findFirstFile(Paths.get(TELTONIKA_FOTA_WEB_DEVICE_EXPORT_FOLDER), TELTONIKA_FOTA_WEB_DEVICE_EXPORT_FILE_EXTENSION);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
 
-        // ### Imei name file
+        if (firstFile.isPresent()) {
+            TELONIKA_FOTA_WEB_DEVICE_INFO_LIST = new CsvToBeanBuilder<TeltonikaFotaWebDeviceInfoBean>(new FileReader(firstFile.get()))
+                    .withType(TeltonikaFotaWebDeviceInfoBean.class).build().parse();
+        }
+
+        // ### Imei=key separator ":" name=value file -> msc/imeiName.txt
 
         File imeiName = new File(IMEI_NAME_FILE_NAME);
         IMEI_NAME = new LinkedHashMap<>();
@@ -422,5 +417,28 @@ public class Main {
         fileTxtWriter.close();
     }
 
-}
+    public static Optional<String> findFirstFile(Path path, String fileExtension)
+            throws IOException {
 
+        if (!Files.isDirectory(path)) {
+            throw new IllegalArgumentException("Path must be a directory!");
+        }
+
+        Optional<String> result;
+
+        try (Stream<Path> walk = Files.walk(path)) {
+            result = walk
+                    .filter(p -> !Files.isDirectory(p))
+                    // this is a path, not string,
+                    // this only test if path end with a certain path
+                    //.filter(p -> p.endsWith(fileExtension))
+                    // convert path to string first
+                    .map(p -> p.toString().toLowerCase())
+                    .filter(f -> f.endsWith(fileExtension))
+                    .findFirst();
+        }
+
+        return result;
+    }
+
+}

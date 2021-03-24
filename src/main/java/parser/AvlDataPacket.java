@@ -179,7 +179,7 @@ public class AvlDataPacket {
                             ",\"manufacturer\":\"" + Main.MANUFACTURER + '\"' +
                             ",\"device\":\"" + Main.DEVICE + '\"' +
 
-                            ",\"imei\":\"" + imei + "\"," + (Main.IMEI_NAME.containsKey(imei) ? "\"imeiName\":\"" + Main.IMEI_NAME.get(imei) + "\"," : "") + "\"messageTotal\":" + size + ",\"messageIndex\":" + (i + 1) + ',' + avlDataList.get(i) +
+                            ",\"imei1\":\"" + imei + "\"," + (Main.IMEI_NAME.containsKey(imei) ? "\"imeiName\":\"" + Main.IMEI_NAME.get(imei) + "\"," : "") + "\"messageTotal\":" + size + ",\"messageIndex\":" + (i + 1) + ',' + avlDataList.get(i) +
 
                             ",\"length\":\"" + avlDataLength + '\"' +
                             ",\"codec\":\"" + codecID + '\"' +
@@ -188,14 +188,19 @@ public class AvlDataPacket {
                             ",\"crc\":\"" + crc + '\"' +
 
                                 (tltBean != null ?
-                                        (",\"sn\":\"" + (tltBean.getSn() != "" ? tltBean.getSn() : "na") + '\"') +
-                                        (",\"model\":\"" + (tltBean.getModel() != "" ? tltBean.getModel() : "na") + '\"') +
-                                        (",\"firmware\":\"" + (tltBean.getFirmware() != "" ? tltBean.getFirmware() : "na") + '\"') +
-                                        (",\"configuration\":\"" + (tltBean.getConfiguration() != "" ? tltBean.getConfiguration() : "na") + '\"') +
+
+                                        (",\"imei2\":\"" + (tltBean.getImei() != "" ? tltBean.getImei() : "na") + '\"') +
                                         (",\"description\":\"" + (tltBean.getDescription() != "" ? tltBean.getDescription() : "na") + '\"') +
+                                        (",\"model\":\"" + (tltBean.getModel() != "" ? tltBean.getModel() : "na") + '\"') +
+                                        (",\"currentFirmware\":\"" + (tltBean.getCurrentFirmware() != "" ? tltBean.getCurrentFirmware() : "na") + '\"') +
+                                        (",\"currentConfiguration\":\"" + (tltBean.getCurrentConfiguration() != "" ? tltBean.getCurrentConfiguration() : "na") + '\"') +
+                                        (",\"serial\":\"" + (tltBean.getSerial() != "" ? tltBean.getSerial() : "na") + '\"') +
                                         (",\"companyName\":\"" + (tltBean.getCompanyName() != "" ? tltBean.getCompanyName() : "na") + '\"') +
-                                        (",\"group\":\"" + (tltBean.getGroup() != "" ? tltBean.getGroup() : "na") + '\"') +
-                                        (",\"lastLogin\":\"" + (tltBean.getLastLogin() != "" ? tltBean.getLastLogin() : "na") + '\"')
+                                        (",\"groupName\":\"" + (tltBean.getGroupName() != "" ? tltBean.getGroupName() : "na") + '\"') +
+                                        (",\"seenAt\":\"" + (tltBean.getSeenAt() != "" ? tltBean.getSeenAt() : "na") + '\"') +
+                                        (",\"createdAt\":\"" + (tltBean.getCreatedAt() != "" ? tltBean.getCreatedAt() : "na") + '\"') +
+                                        (",\"updatedAt\":\"" + (tltBean.getUpdatedAt() != "" ? tltBean.getUpdatedAt() : "na") + '\"')
+
                                         : "") +
 
                                 (FLAG_RAW_DATA ? (",\"rawData\":\"" + rawWithoutLogHeader + "\"") : ("")) +
@@ -204,7 +209,6 @@ public class AvlDataPacket {
 
                         "\r\n");
             }
-//            writer.write("\r\n");
         } catch (IOException e) {
             e.printStackTrace();
         }

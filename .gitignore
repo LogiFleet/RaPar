@@ -4,5 +4,4 @@
 .idea/
 RaPar.iml
 target/
-!/msc/fota_device_export.csv
 !/msc/imeiName.txt

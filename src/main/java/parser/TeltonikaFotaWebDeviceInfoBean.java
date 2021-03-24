@@ -7,44 +7,52 @@ public class TeltonikaFotaWebDeviceInfoBean {
     @CsvBindByName(column = "imei")
     private String imei;
 
-    @CsvBindByName(column = "sn")
-    private String sn;
+    @CsvBindByName(column = "description")
+    private String description;
 
     @CsvBindByName(column = "model")
     private String model;
 
-    @CsvBindByName(column = "firmware")
-    private String firmware;
+    @CsvBindByName(column = "current_firmware")
+    private String currentFirmware;
 
-    @CsvBindByName(column = "configuration")
-    private String configuration;
+    @CsvBindByName(column = "current_configuration")
+    private String currentConfiguration;
 
-    @CsvBindByName(column = "description")
-    private String description;
+    @CsvBindByName(column = "serial")
+    private String serial;
 
-    @CsvBindByName(column = "companyname")
+    @CsvBindByName(column = "company_name")
     private String companyName;
 
-    @CsvBindByName(column = "group")
-    private String group;
+    @CsvBindByName(column = "group_name")
+    private String groupName;
 
-    @CsvBindByName(column = "lastlogin")
-    private String lastLogin;
+    @CsvBindByName(column = "seen_at")
+    private String seenAt;
+
+    @CsvBindByName(column = "created_at")
+    private String createdAt;
+
+    @CsvBindByName(column = "updated_at")
+    private String updatedAt;
 
     // to string
 
     @Override
     public String toString() {
-        return "parser.TeltonikaFotaWebDeviceInfoBean{" +
+        return "TeltonikaFotaWebDeviceInfoBean{" +
                 "imei='" + imei + '\'' +
-                ", sn='" + sn + '\'' +
-                ", model='" + model + '\'' +
-                ", firmware='" + firmware + '\'' +
-                ", configuration='" + configuration + '\'' +
                 ", description='" + description + '\'' +
+                ", model='" + model + '\'' +
+                ", currentFirmware='" + currentFirmware + '\'' +
+                ", currentConfiguration='" + currentConfiguration + '\'' +
+                ", serial='" + serial + '\'' +
                 ", companyName='" + companyName + '\'' +
-                ", group='" + group + '\'' +
-                ", lastLogin='" + lastLogin + '\'' +
+                ", groupName='" + groupName + '\'' +
+                ", seenAt='" + seenAt + '\'' +
+                ", createdAt='" + createdAt + '\'' +
+                ", updatedAt='" + updatedAt + '\'' +
                 '}';
     }
 
@@ -58,12 +66,12 @@ public class TeltonikaFotaWebDeviceInfoBean {
         this.imei = imei;
     }
 
-    public String getSn() {
-        return sn;
+    public String getDescription() {
+        return description;
     }
 
-    public void setSn(String sn) {
-        this.sn = sn;
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public String getModel() {
@@ -74,28 +82,28 @@ public class TeltonikaFotaWebDeviceInfoBean {
         this.model = model;
     }
 
-    public String getFirmware() {
-        return firmware;
+    public String getCurrentFirmware() {
+        return currentFirmware;
     }
 
-    public void setFirmware(String firmware) {
-        this.firmware = firmware;
+    public void setCurrentFirmware(String currentFirmware) {
+        this.currentFirmware = currentFirmware;
     }
 
-    public String getConfiguration() {
-        return configuration;
+    public String getCurrentConfiguration() {
+        return currentConfiguration;
     }
 
-    public void setConfiguration(String configuration) {
-        this.configuration = configuration;
+    public void setCurrentConfiguration(String currentConfiguration) {
+        this.currentConfiguration = currentConfiguration;
     }
 
-    public String getDescription() {
-        return description;
+    public String getSerial() {
+        return serial;
     }
 
-    public void setDescription(String description) {
-        this.description = description;
+    public void setSerial(String serial) {
+        this.serial = serial;
     }
 
     public String getCompanyName() {
@@ -106,19 +114,36 @@ public class TeltonikaFotaWebDeviceInfoBean {
         this.companyName = companyName;
     }
 
-    public String getGroup() {
-        return group;
+    public String getGroupName() {
+        return groupName;
     }
 
-    public void setGroup(String group) {
-        this.group = group;
+    public void setGroupName(String groupName) {
+        this.groupName = groupName;
     }
 
-    public String getLastLogin() {
-        return lastLogin;
+    public String getSeenAt() {
+        return seenAt;
     }
 
-    public void setLastLogin(String lastLogin) {
-        this.lastLogin = lastLogin;
+    public void setSeenAt(String seenAt) {
+        this.seenAt = seenAt;
     }
+
+    public String getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(String createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public String getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(String updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+
 }
