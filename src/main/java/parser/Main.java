@@ -28,6 +28,7 @@ public class Main {
     public static LinkedHashMap<String, Instant> IMEI_LAST_AVL_DATA_TIMESTAMP;
     public static LinkedHashMap<String, String> IMEI_NAME;
     public static LinkedHashMap<String, Boolean> IMEI_DIGITAL_INPUT_2_STATE_HAS_CHANGED;
+    public static LinkedHashMap<String, Instant> IMEI_I_BUTTON_VALUE_HAS_CHANGED;
     public static String MANUFACTURER;
     public static String DEVICE;
     public static List<TeltonikaFotaWebDeviceInfoBean> TELONIKA_FOTA_WEB_DEVICE_INFO_LIST;
@@ -334,6 +335,10 @@ public class Main {
         // ### Digital Input 2 (for Business / Private switch mode use case)
 
         IMEI_DIGITAL_INPUT_2_STATE_HAS_CHANGED = new LinkedHashMap<>();
+
+        // ### iButton for driver authentication
+
+        IMEI_I_BUTTON_VALUE_HAS_CHANGED = new LinkedHashMap<>();
 
         // ### Parser Main Process
 

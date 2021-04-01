@@ -25,6 +25,9 @@ public class AvlData {
     private static final int Axis_Z_PROPERTY_ID = 19;
 
     // Other static values
+
+    private static final int DELAY_BETWEEN_TWO_I_BUTTON_EVENT_MS = 20000;
+
     private static final String ZERO_8BYTES = "0000000000000000";
     private static final String ZERO_4BYTES = "00000000";
     private static final String ZERO_STRING = "0";
@@ -53,6 +56,7 @@ public class AvlData {
     private boolean gatewayDateMinusTimeStampIsNegative;
     private boolean gatewayDateMinusTimeStampGreaterThan15Min;  //todo refactoring, naming, greater or equal to 15 min, but it's too long
     private boolean digitalInput2StateHasChanged;   // Business Private switch
+    private boolean iButtonSetResetInLessThanNSeconds;
     private String priority;
     private float longitude;
     private float latitude;
@@ -60,10 +64,12 @@ public class AvlData {
     private Short angle;
     private Byte satellite;
     private Short speed;
+    private int eventID;
 
     private IOElement ioElement;
 
     private final DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
+    private Instant timeStampInstant;
 
     public AvlData(AvlDataPacket avlDataPacket, String raw) {
         this.avlDataPacket = avlDataPacket;
@@ -75,7 +81,7 @@ public class AvlData {
 
     @Override
     public String toString() {
-        return  (FLAG_TIME_STAMP ? ("\"gatewayDate\":\"" + gatewayDate + "\",") : ("")) +
+        return (FLAG_TIME_STAMP ? ("\"gatewayDate\":\"" + gatewayDate + "\",") : ("")) +
                 "\"timeStamp\":\"" + timeStamp + '\"' +
                 ",\"lastTimeStamp\":\"" + (lastTimeStamp != null ? lastTimeStamp : '0') + '\"' +
                 ",\"timeStampDiff\":\"" + timeStampDiff + '\"' +
@@ -84,10 +90,11 @@ public class AvlData {
                 (FLAG_TIME_STAMP ? (",\"gatewayDateMinusTimeStampIsNegative\":\"" + (gatewayDateMinusTimeStampIsNegative ? '1' : '0') + "\"") : ("")) +
                 (FLAG_TIME_STAMP ? (",\"gatewayDateMinusTimeStampGreaterThan15Min\":\"" + (gatewayDateMinusTimeStampGreaterThan15Min ? '1' : '0') + "\"") : ("")) +
                 ",\"digitalInput2StateHasChanged\":\"" + (IMEI_DIGITAL_INPUT_2_STATE_HAS_CHANGED.get(avlDataPacket.getImei()) != null ? digitalInput2StateHasChanged : "na") + '\"' +
+                ",\"iButtonSetResetInLessThanNSeconds\":\"" + iButtonSetResetInLessThanNSeconds + '\"' +
                 ",\"priority\":\"" + priority + '\"' +
                 ",\"location\":{" + // JSON format (e.g. for Kibana import (geo map))
-                    "\"lat\":" + String.format("%.7f", latitude) +
-                    ",\"lon\":" + String.format("%.7f", longitude) +
+                "\"lat\":" + String.format("%.7f", latitude) +
+                ",\"lon\":" + String.format("%.7f", longitude) +
                 "}" +
                 ",\"lat\":" + String.format("%.7f", latitude) +  // Google map xlsx import format
                 ",\"lon\":" + String.format("%.7f", longitude) +
@@ -98,10 +105,9 @@ public class AvlData {
                 "," + ioElement;
     }
 
-    private void parse(){
+    private void parse() {
         Instant gatewayDateInstant = null;
         Instant lastAvlDataTimestampInstant;
-        Instant timeStampInstant;
         Duration duration;
 
         if (FLAG_TIME_STAMP) {
@@ -112,7 +118,7 @@ public class AvlData {
         lastAvlDataTimestampInstant = IMEI_LAST_AVL_DATA_TIMESTAMP.get(avlDataPacket.getImei());
         lastTimeStamp = lastAvlDataTimestampInstant != null ? fmt.format(lastAvlDataTimestampInstant.atZone(ZoneId.systemDefault())) : null;
 
-        timeStampInstant = Instant.ofEpochMilli(Long.parseLong(raw.substring(0,16), 16));
+        timeStampInstant = Instant.ofEpochMilli(Long.parseLong(raw.substring(0, 16), 16));
         timeStamp = fmt.format(timeStampInstant.atZone(ZoneId.systemDefault()));
 
         IMEI_LAST_AVL_DATA_TIMESTAMP.put(avlDataPacket.getImei(), timeStampInstant);
@@ -132,7 +138,7 @@ public class AvlData {
         }
 
         if (FLAG_TIME_STAMP) {
-            duration = Duration.between(timeStampInstant,gatewayDateInstant);
+            duration = Duration.between(timeStampInstant, gatewayDateInstant);
 
             gatewayDateMinusTimeStampIsNegative = duration.isNegative();
 
@@ -152,12 +158,12 @@ public class AvlData {
 
         priority = raw.substring(16, 18);
 
-        longitude = (float)(Integer.parseInt(raw.substring(18, 26), 16)) / 10000000;
-        latitude = (float)(Integer.parseInt(raw.substring(26, 34), 16)) / 10000000;
+        longitude = (float) ((int) Long.parseLong(raw.substring(18, 26), 16)) / 10000000;
+        latitude = (float) ((int) Long.parseLong(raw.substring(26, 34), 16)) / 10000000;
 
         // fix negative altitude eg. "alt=-045"
         try {
-            altitude = (short)(Integer.parseInt(raw.substring(34, 38), 16));
+            altitude = (short) (Integer.parseInt(raw.substring(34, 38), 16));
         } catch (NumberFormatException e) {
             e.printStackTrace();
         }
@@ -166,7 +172,7 @@ public class AvlData {
         satellite = Byte.parseByte(raw.substring(42, 44), 16);
         speed = Short.parseShort(raw.substring(44, 48), 16);
 
-        int eventID = Integer.parseInt(raw.substring(48, 50), 16);
+        eventID = Integer.parseInt(raw.substring(48, 50), 16);
         int elementCount = Integer.parseInt(raw.substring(50, 52), 16);
 
         String str;
@@ -216,6 +222,24 @@ public class AvlData {
                 String hexID = str.substring(0, size);
                 value = ZERO_8BYTES.compareTo(hexID) == 0 ? ZERO_STRING : hexID.toUpperCase();
 
+                if (eventID == I_BUTTON_PROPERTY_ID && key == I_BUTTON_PROPERTY_ID && ZERO_8BYTES.compareTo(hexID) != 0) {
+                    IMEI_I_BUTTON_VALUE_HAS_CHANGED.put(avlDataPacket.getImei(), timeStampInstant);
+                }
+
+                if (eventID == I_BUTTON_PROPERTY_ID &&
+                        key == I_BUTTON_PROPERTY_ID &&
+                        ZERO_8BYTES.compareTo(hexID) == 0 &&
+                        IMEI_I_BUTTON_VALUE_HAS_CHANGED.get(avlDataPacket.getImei()) != null &&
+                        Duration.between(IMEI_I_BUTTON_VALUE_HAS_CHANGED.get(avlDataPacket.getImei()), timeStampInstant).toMillis() <= DELAY_BETWEEN_TWO_I_BUTTON_EVENT_MS) {
+
+                    //todo check that avlDataPacket output only once even this behavior pattern happen multiple times in same packet
+                    //todo output in dedicated file
+//                     System.out.println(avlDataPacket.getRaw());
+                    iButtonSetResetInLessThanNSeconds = true;
+                } else {
+                    iButtonSetResetInLessThanNSeconds = false;
+                }
+
                 // Additional parsing of "Engine is working" value
                 if (key == SECURITY_STATE_FLAGS_PROPERTY_ID && value.compareTo(ZERO_STRING) != 0) {
                     byte[] securityStateFlags = StringToByteArray(value.toCharArray());
@@ -233,7 +257,7 @@ public class AvlData {
             } else if (key == CONTROL_STATE_FLAGS_PROPERTY_ID) {    // 4 bytes
                 String hexID = str.substring(0, size);
                 value = ZERO_4BYTES.compareTo(hexID) == 0 ? ZERO_STRING : hexID.toUpperCase();
-            } else if (key == Axis_X_PROPERTY_ID ||key == Axis_Y_PROPERTY_ID ||key == Axis_Z_PROPERTY_ID) {    // Value is a signed short
+            } else if (key == Axis_X_PROPERTY_ID || key == Axis_Y_PROPERTY_ID || key == Axis_Z_PROPERTY_ID) {    // Value is a signed short
                 String hexValue = str.substring(0, size);
                 short s = (short) Integer.parseInt(hexValue, 16);
                 value = "" + s;
@@ -246,11 +270,33 @@ public class AvlData {
                     Boolean lastDigitalInput2State = IMEI_DIGITAL_INPUT_2_STATE_HAS_CHANGED.get(avlDataPacket.getImei());
                     if (currentDigitalInput2State != lastDigitalInput2State) {
                         digitalInput2StateHasChanged = true;
+
+                        if (!avlDataPacket.isAtLeastOneAvlDataInAvlDataPacketContainDI2PropertyStateChangeWithoutDI2TriggeredEvent() && eventID != DIGITAL_INPUT_2_PROPERTY_ID) {
+                            avlDataPacket.setAtLeastOneAvlDataInAvlDataPacketContainDI2PropertyStateChangeWithoutDI2TriggeredEvent(true);
+
+                            // to avoid getting twice same output message
+                            if (!avlDataPacket.isAtLeastOneAvlDataInAvlDataPacketContainDI2TriggeredEventWithoutDI2PropertyStateChange()) {
+                                //todo output in dedicated file
+//                                 System.out.println(avlDataPacket.getRaw());
+                            }
+                        }
                     } else {
                         digitalInput2StateHasChanged = false;
                     }
                 } else {
                     digitalInput2StateHasChanged = false;
+                }
+
+                if (eventID == DIGITAL_INPUT_2_PROPERTY_ID && !digitalInput2StateHasChanged) {
+                    if (!avlDataPacket.isAtLeastOneAvlDataInAvlDataPacketContainDI2TriggeredEventWithoutDI2PropertyStateChange()) {
+                        avlDataPacket.setAtLeastOneAvlDataInAvlDataPacketContainDI2TriggeredEventWithoutDI2PropertyStateChange(true);
+
+                        // to avoid getting twice same output message
+                        if (!avlDataPacket.isAtLeastOneAvlDataInAvlDataPacketContainDI2PropertyStateChangeWithoutDI2TriggeredEvent()) {
+                            //todo output in dedicated file
+//                             System.out.println(avlDataPacket.getRaw());
+                        }
+                    }
                 }
 
                 IMEI_DIGITAL_INPUT_2_STATE_HAS_CHANGED.put(avlDataPacket.getImei(), currentDigitalInput2State);

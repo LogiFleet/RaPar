@@ -27,6 +27,9 @@ public class AvlDataPacket {
     private String avlDataCountEnd;
     private String crc;
 
+    private boolean atLeastOneAvlDataInAvlDataPacketContainDI2PropertyStateChangeWithoutDI2TriggeredEvent;
+    private boolean atLeastOneAvlDataInAvlDataPacketContainDI2TriggeredEventWithoutDI2PropertyStateChange;
+
     public AvlDataPacket(String raw, String imei, String preamble, String avlDataLength, String codecID, String avlDataCount, String avlDataAggregated) {
         this.raw = raw;
         this.imei = imei;
@@ -260,4 +263,19 @@ public class AvlDataPacket {
         return crc;
     }
 
+    public boolean isAtLeastOneAvlDataInAvlDataPacketContainDI2PropertyStateChangeWithoutDI2TriggeredEvent() {
+        return atLeastOneAvlDataInAvlDataPacketContainDI2PropertyStateChangeWithoutDI2TriggeredEvent;
+    }
+
+    public void setAtLeastOneAvlDataInAvlDataPacketContainDI2PropertyStateChangeWithoutDI2TriggeredEvent(boolean atLeastOneAvlDataInAvlDataPacketContainDI2PropertyStateChangeWithoutDI2TriggeredEvent) {
+        this.atLeastOneAvlDataInAvlDataPacketContainDI2PropertyStateChangeWithoutDI2TriggeredEvent = atLeastOneAvlDataInAvlDataPacketContainDI2PropertyStateChangeWithoutDI2TriggeredEvent;
+    }
+
+    public boolean isAtLeastOneAvlDataInAvlDataPacketContainDI2TriggeredEventWithoutDI2PropertyStateChange() {
+        return atLeastOneAvlDataInAvlDataPacketContainDI2TriggeredEventWithoutDI2PropertyStateChange;
+    }
+
+    public void setAtLeastOneAvlDataInAvlDataPacketContainDI2TriggeredEventWithoutDI2PropertyStateChange(boolean atLeastOneAvlDataInAvlDataPacketContainDI2TriggeredEventWithoutDI2PropertyStateChange) {
+        this.atLeastOneAvlDataInAvlDataPacketContainDI2TriggeredEventWithoutDI2PropertyStateChange = atLeastOneAvlDataInAvlDataPacketContainDI2TriggeredEventWithoutDI2PropertyStateChange;
+    }
 }
