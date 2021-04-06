@@ -366,21 +366,22 @@ public class Main {
                 String str = it.nextLine();
                 AvlDataPacket avlDataPacket;
 
-                // Size of timestamp is dynamic, because sometimes there is and sometimes there is no millisecond at the end, e.g.:
-                // - 2020-11-09T06:44:50.120Z
-                // - 2020-11-09T06:44:54Z
-                int zuluTimeZPosition = str.indexOf('Z');
-                int zuluTimeZPositionOffset;
-
-                if (zuluTimeZPosition == 39) {
-                    zuluTimeZPositionOffset = 0;
-                } else if (zuluTimeZPosition == 35) {
-                    zuluTimeZPositionOffset = -4;
-                } else {
-                    throw new java.lang.RuntimeException("Z, for zulu time, in log timestamp, bad position.");
-                }
-
                 if (FLAG_TIME_STAMP) {
+
+                    // Size of timestamp is dynamic, because sometimes there is and sometimes there is no millisecond at the end, e.g.:
+                    // - 2020-11-09T06:44:50.120Z
+                    // - 2020-11-09T06:44:54Z
+                    int zuluTimeZPosition = str.indexOf('Z');
+                    int zuluTimeZPositionOffset;
+
+                    if (zuluTimeZPosition == 39) {
+                        zuluTimeZPositionOffset = 0;
+                    } else if (zuluTimeZPosition == 35) {
+                        zuluTimeZPositionOffset = -4;
+                    } else {
+                        throw new java.lang.RuntimeException("Z, for zulu time, in log timestamp, bad position.");
+                    }
+
                     avlDataPacket = new AvlDataPacket(str,
                             str.substring(0, 15),
                             str.substring(16, 40 + zuluTimeZPositionOffset),
