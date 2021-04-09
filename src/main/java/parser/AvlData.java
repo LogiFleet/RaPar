@@ -25,7 +25,6 @@ public class AvlData {
     private static final int Axis_Z_PROPERTY_ID = 19;
 
     // Other static values
-
     private static final int DELAY_BETWEEN_TWO_I_BUTTON_EVENT_MS = 20000;
 
     private static final String ZERO_8BYTES = "0000000000000000";
@@ -57,6 +56,7 @@ public class AvlData {
     private boolean gatewayDateMinusTimeStampGreaterThan15Min;  //todo refactoring, naming, greater or equal to 15 min, but it's too long
     private boolean digitalInput2StateHasChanged;   // Business Private switch
     private boolean iButtonSetResetInLessThanNSeconds;
+    private boolean previousAvlDataOdometerGreaterThanCurrent;
     private String priority;
     private float longitude;
     private float latitude;
@@ -91,6 +91,7 @@ public class AvlData {
                 (FLAG_TIME_STAMP ? (",\"gatewayDateMinusTimeStampGreaterThan15Min\":\"" + (gatewayDateMinusTimeStampGreaterThan15Min ? '1' : '0') + "\"") : ("")) +
                 ",\"digitalInput2StateHasChanged\":\"" + (IMEI_DIGITAL_INPUT_2_STATE_HAS_CHANGED.get(avlDataPacket.getImei()) != null ? digitalInput2StateHasChanged : "na") + '\"' +
                 ",\"iButtonSetResetInLessThanNSeconds\":\"" + iButtonSetResetInLessThanNSeconds + '\"' +
+                ",\"previousAvlDataOdometerGreaterThanCurrent\":\"" + previousAvlDataOdometerGreaterThanCurrent + '\"' +
                 ",\"priority\":\"" + priority + '\"' +
                 ",\"location\":{" + // JSON format (e.g. for Kibana import (geo map))
                 "\"lat\":" + String.format("%.7f", latitude) +
@@ -300,6 +301,20 @@ public class AvlData {
                 }
 
                 IMEI_DIGITAL_INPUT_2_STATE_HAS_CHANGED.put(avlDataPacket.getImei(), currentDigitalInput2State);
+
+            } else if (key == ODOMETER_PROPERTY_ID) {
+                value = String.valueOf(Long.parseUnsignedLong(str.substring(0, size), 16));
+                long odometer = Long.parseLong(value);
+
+                if (ODOMETER.get(avlDataPacket.getImei()) != null && ODOMETER.get(avlDataPacket.getImei()) > odometer) {
+                    previousAvlDataOdometerGreaterThanCurrent = true;
+
+                    //todo check that avlDataPacket output only once even this issue (or other already outputted) happen multiple times in same packet
+                    //todo output in dedicated file
+//                     System.out.println(avlDataPacket.getRaw());
+                }
+
+                ODOMETER.put(avlDataPacket.getImei(), odometer);
 
             } else {
                 value = String.valueOf(Long.parseUnsignedLong(str.substring(0, size), 16));

@@ -29,8 +29,23 @@ public class Main {
     public static LinkedHashMap<String, String> IMEI_NAME;
     public static LinkedHashMap<String, Boolean> IMEI_DIGITAL_INPUT_2_STATE_HAS_CHANGED;
     public static LinkedHashMap<String, Instant> IMEI_I_BUTTON_VALUE_HAS_CHANGED;
+    public static LinkedHashMap<String, Long> ODOMETER;
     public static String MANUFACTURER;
+
     public static String DEVICE;
+    public static final String DEVICE_FM3001="fm3001";
+    public static final String DEVICE_FM36M1="fm36m1";
+    public static final String DEVICE_FMM130="fmm130";
+    public static final String DEVICE_FMC130="fmc130";
+
+    // Teltonika FM36M1
+    public static final int ODOMETER_FM36M1_PROPERTY_ID = 99;  // Continuous odometer
+
+    // Teltonika FM3001, FMM130, FMC130
+    public static final int ODOMETER_FM3001_FMM130_FMC130_PROPERTY_ID = 16;  // Total Odometer
+
+    public static int ODOMETER_PROPERTY_ID;
+
     public static List<TeltonikaFotaWebDeviceInfoBean> TELONIKA_FOTA_WEB_DEVICE_INFO_LIST;
     public static boolean FLAG_TIME_STAMP = false;
     public static boolean FLAG_RAW_DATA = false;
@@ -191,7 +206,19 @@ public class Main {
         commandLine = parseCommandLineArguments(args);
 
         MANUFACTURER = commandLine.getOptionValue(OPTION_MANUFACTURER);
+
         DEVICE = commandLine.getOptionValue(OPTION_DEVICE);
+
+        if (DEVICE.equals(DEVICE_FM36M1)) {
+            ODOMETER_PROPERTY_ID = ODOMETER_FM36M1_PROPERTY_ID;
+        } else if (
+                DEVICE.equals(DEVICE_FM36M1) ||
+                DEVICE.equals(DEVICE_FM3001) ||
+                DEVICE.equals(DEVICE_FMM130) ||
+                DEVICE.equals(DEVICE_FMC130)) {
+            ODOMETER_PROPERTY_ID = ODOMETER_FM3001_FMM130_FMC130_PROPERTY_ID;
+        }
+
         deviceSelector = keyDotSeparatedBuilder(MANUFACTURER, DEVICE);
 
         sysOutFormatted("Selector", deviceSelector);
@@ -339,6 +366,10 @@ public class Main {
         // ### iButton for driver authentication
 
         IMEI_I_BUTTON_VALUE_HAS_CHANGED = new LinkedHashMap<>();
+
+        // ### Odometer
+
+        ODOMETER = new LinkedHashMap<>();
 
         // ### Parser Main Process
 
