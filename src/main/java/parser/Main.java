@@ -89,6 +89,7 @@ public class Main {
     private static final String IMEI_NAME_FILE_NAME = "msc/imeiName.txt";
     private static final String INPUT_FILE_NAME = "data/in-raw.txt";
     private static final String OUTPUT_FILE_NAME = "data/out-ndjson.txt";
+    private static final String SAMPLE_FILE_NAME = "data/sample.txt";
 
     private static final String NUMBER_OF_FILE_LINES_TO_TREAT = "*";    // "*" for all
 
@@ -262,7 +263,10 @@ public class Main {
         File file = new File(INPUT_FILE_NAME);
         LineIterator it = null;
         long fileLineCount = 0;
-        Writer fileTxtWriter = new FileWriter(OUTPUT_FILE_NAME, false); //overwrites file
+
+        Writer outputFileTxtWriter = new FileWriter(OUTPUT_FILE_NAME, false); //overwrites file
+        Writer sampleFileTxtWriter = new FileWriter(SAMPLE_FILE_NAME, false); //overwrites file
+
         int fileLineNumber = 0;
         int matchLine = 0;
         char[] animationChars = new char[]{'|', '/', '-', '\\'};
@@ -413,14 +417,25 @@ public class Main {
                         throw new java.lang.RuntimeException("Z, for zulu time, in log timestamp, bad position.");
                     }
 
-                    avlDataPacket = new AvlDataPacket(str,
-                            str.substring(0, 15),
-                            str.substring(16, 40 + zuluTimeZPositionOffset),
+                    String imei = str.substring(0, 15);
+                    String timeStamp = str.substring(16, 40 + zuluTimeZPositionOffset);
+                    String avlDataLength = str.substring(49 + zuluTimeZPositionOffset, 57 + zuluTimeZPositionOffset);
+                    String avlDataCount = str.substring(59 + zuluTimeZPositionOffset, 61 + zuluTimeZPositionOffset);
+
+                    avlDataPacket = new AvlDataPacket(
+                            str,
+                            imei,
+                            timeStamp,
                             str.substring(41 + zuluTimeZPositionOffset, 49 + zuluTimeZPositionOffset),
-                            str.substring(49 + zuluTimeZPositionOffset, 57 + zuluTimeZPositionOffset),
+                            avlDataLength,
                             str.substring(57 + zuluTimeZPositionOffset, 59 + zuluTimeZPositionOffset),
-                            str.substring(59 + zuluTimeZPositionOffset, 61 + zuluTimeZPositionOffset),
+                            avlDataCount,
                             str.substring(61 + zuluTimeZPositionOffset));
+
+//                    String date = timeStamp.substring(0, 10);
+//                    sampleFileTxtWriter.write(date + ',' + imei + ',' + Integer.parseInt(avlDataCount, 16) + "\r\n");
+//                    sampleFileTxtWriter.write(date + ',' + Integer.parseInt(avlDataCount, 16) + "\r\n");
+
                 } else {
                     avlDataPacket = new AvlDataPacket(str,
                             str.substring(0, 15),
@@ -436,7 +451,7 @@ public class Main {
                 fileLineNumber++;
 
                 matchLine++;
-                int more = avlDataPacket.soutStd(fileTxtWriter, fileLineNumber, matchLine);
+                int more = avlDataPacket.soutStd(outputFileTxtWriter, fileLineNumber, matchLine);
                 matchLine += more;
 
                 processedPercentage = (int) Math.round((((double) fileLineNumber / (double) lineToTreat) * 100.0));
@@ -451,7 +466,8 @@ public class Main {
         System.out.print(matchLine + " matched in " + lineToTreat);
         System.out.println();
 
-        fileTxtWriter.close();
+        outputFileTxtWriter.close();
+        sampleFileTxtWriter.close();
     }
 
     public static Optional<String> findFirstFile(Path path, String fileExtension)

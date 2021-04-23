@@ -104,6 +104,11 @@ public class AvlData {
                 ",\"satellite\":" + satellite +
                 ",\"speed\":" + speed +
                 "," + ioElement;
+
+//        long duration = Duration.between(timeStampInstant, Instant.parse(avlDataPacket.getTimeStamp())).toMillis() / 1000;
+//
+//        return (gatewayDate + "," + timeStamp + "," + duration);
+//        return (gatewayDate.substring(0,10) + "," + duration);
     }
 
     private void parse() {

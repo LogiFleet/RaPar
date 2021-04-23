@@ -211,6 +211,8 @@ public class AvlDataPacket {
                         '}' +
 
                         "\r\n");
+
+//                writer.write(avlDataList.get(i) + "\r\n");
             }
         } catch (IOException e) {
             e.printStackTrace();
