@@ -91,6 +91,8 @@ public class Main {
     private static final String OUTPUT_FILE_NAME = "data/out-ndjson.txt";
     private static final String SAMPLE_FILE_NAME = "data/sample.txt";
 
+    public static Writer SAMPLE_FILE_TXT_WRITER;
+
     private static final String NUMBER_OF_FILE_LINES_TO_TREAT = "*";    // "*" for all
 
     /**
@@ -265,7 +267,7 @@ public class Main {
         long fileLineCount = 0;
 
         Writer outputFileTxtWriter = new FileWriter(OUTPUT_FILE_NAME, false); //overwrites file
-        Writer sampleFileTxtWriter = new FileWriter(SAMPLE_FILE_NAME, false); //overwrites file
+        SAMPLE_FILE_TXT_WRITER = new FileWriter(SAMPLE_FILE_NAME, false); //overwrites file
 
         int fileLineNumber = 0;
         int matchLine = 0;
@@ -433,8 +435,8 @@ public class Main {
                             str.substring(61 + zuluTimeZPositionOffset));
 
 //                    String date = timeStamp.substring(0, 10);
-//                    sampleFileTxtWriter.write(date + ',' + imei + ',' + Integer.parseInt(avlDataCount, 16) + "\r\n");
-//                    sampleFileTxtWriter.write(date + ',' + Integer.parseInt(avlDataCount, 16) + "\r\n");
+//                    SAMPLE_FILE_TXT_WRITER.write(date + ',' + imei + ',' + Integer.parseInt(avlDataCount, 16) + "\r\n");
+//                    SAMPLE_FILE_TXT_WRITER.write(date + ',' + Integer.parseInt(avlDataCount, 16) + "\r\n");
 
                 } else {
                     avlDataPacket = new AvlDataPacket(str,
@@ -467,7 +469,7 @@ public class Main {
         System.out.println();
 
         outputFileTxtWriter.close();
-        sampleFileTxtWriter.close();
+        SAMPLE_FILE_TXT_WRITER.close();
     }
 
     public static Optional<String> findFirstFile(Path path, String fileExtension)

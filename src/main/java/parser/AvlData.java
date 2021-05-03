@@ -3,6 +3,7 @@ package parser;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 
+import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
@@ -160,6 +161,14 @@ public class AvlData {
 
             Duration fifteenMinutes = Duration.ofMinutes(MINUTES_UNTIL_IGNITION_ON_NO_SIGNAL);
             gatewayDateMinusTimeStampGreaterThan15Min = duration.compareTo(fifteenMinutes) >= 0;
+
+//            if (gatewayDateMinusTimeStampGreaterThan15Min) {
+//                try {
+//                    SAMPLE_FILE_TXT_WRITER.write(avlDataPacket.getRaw() + "\r\n");
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                }
+//            }
         }
 
         priority = raw.substring(16, 18);
